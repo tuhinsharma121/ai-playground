@@ -1,0 +1,3 @@
+llama-index==0.12.22
+llama-index-packs-raptor==0.3.0
+llama-index-vector-stores-chroma==0.4.0
