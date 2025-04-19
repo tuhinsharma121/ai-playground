@@ -1,0 +1,5 @@
+llama-index==0.12.30
+graspologic==3.4.1
+numpy==1.26.4
+scipy==1.12.0
+future==1.0.0
