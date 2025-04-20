@@ -1,0 +1,2 @@
+llama-index==0.12.30
+fast_graphrag==0.0.5
