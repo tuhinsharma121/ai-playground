@@ -1,0 +1,2 @@
+llama-index==0.12.30
+hipporag==2.0.0a3
