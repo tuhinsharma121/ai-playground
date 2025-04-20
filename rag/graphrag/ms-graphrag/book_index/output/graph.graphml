@@ -1,0 +1,762 @@
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <graph edgedefault="undirected">
+    <node id="BOB CRATCHIT" />
+    <node id="EBENEZER SCROOGE" />
+    <node id="PETER CRATCHIT" />
+    <node id="TIM CRATCHIT" />
+    <node id="MRS. CRATCHIT" />
+    <node id="MR. FEZZIWIG" />
+    <node id="MRS. FEZZIWIG" />
+    <node id="FRED" />
+    <node id="GHOST OF JACOB MARLEY" />
+    <node id="JOE" />
+    <node id="SCROOGE" />
+    <node id="BELLE" />
+    <node id="MRS. DILBER" />
+    <node id="FAN" />
+    <node id="MR. TOPPER" />
+    <node id="DICK WILKINS" />
+    <node id="CAROLINE" />
+    <node id="BELINDA CRATCHIT" />
+    <node id="MARTHA CRATCHIT" />
+    <node id="MARLEY" />
+    <node id="STAVE ONE" />
+    <node id="MARLEY'S GHOST" />
+    <node id="HAMLET" />
+    <node id="ST. PAUL'S CHURCHYARD" />
+    <node id="OLD MARLEY" />
+    <node id="SCROOGE AND MARLEY" />
+    <node id="NEPHEW" />
+    <node id="CLERK" />
+    <node id="CHRISTMAS" />
+    <node id="BEDLAM" />
+    <node id="PARLIAMENT" />
+    <node id="GENTLEMAN" />
+    <node id="TREADMILL" />
+    <node id="POOR LAW" />
+    <node id="UNION WORKHOUSES" />
+    <node id="LIBERALITY" />
+    <node id="ST. DUNSTAN" />
+    <node id="EVIL SPIRIT" />
+    <node id="COUNTING-HOUSE" />
+    <node id="MELANCHOLY TAVERN" />
+    <node id="MELANCHOLY DINER" />
+    <node id="MELANCHOLY ROOMS" />
+    <node id="BANKER'S BOOK" />
+    <node id="CITY OF LONDON" />
+    <node id="LONDON" />
+    <node id="CAMDEN TOWN" />
+    <node id="CHRISTMAS EVE" />
+    <node id="GENIUS OF THE WEATHER" />
+    <node id="CORPORATION" />
+    <node id="ALDERMEN" />
+    <node id="LIVERY" />
+    <node id="DUTCH MERCHANT" />
+    <node id="LOBSTER" />
+    <node id="KNOCKER" />
+    <node id="KEY" />
+    <node id="CANDLE" />
+    <node id="HEARSE" />
+    <node id="GAS-LAMPS" />
+    <node id="ENTRY" />
+    <node id="DIP" />
+    <node id="ROOMS" />
+    <node id="TABLE" />
+    <node id="SOFA" />
+    <node id="FIRE" />
+    <node id="SPOON" />
+    <node id="BASIN" />
+    <node id="SAUCEPAN" />
+    <node id="BED" />
+    <node id="CLOSET" />
+    <node id="DRESSING-GOWN" />
+    <node id="FIRE-GUARD" />
+    <node id="SHOES" />
+    <node id="FISH BASKETS" />
+    <node id="WASHING-STAND" />
+    <node id="POKER" />
+    <node id="FUEL" />
+    <node id="FIREPLACE" />
+    <node id="DUTCH TILES" />
+    <node id="SCRIPTURES" />
+    <node id="CAINS AND ABELS" />
+    <node id="PHARAOH'S DAUGHTERS" />
+    <node id="QUEENS OF SHEBA" />
+    <node id="ANGELIC MESSENGERS" />
+    <node id="ABRAHAMS" />
+    <node id="BELSHAZZARS" />
+    <node id="APOSTLES" />
+    <node id="BUTTER-BOATS" />
+    <node id="FIGURES" />
+    <node id="ANCIENT PROPHET" />
+    <node id="SMOOTH TILE" />
+    <node id="BLANK" />
+    <node id="PICTURE" />
+    <node id="GHOSTLY SPECTACLES" />
+    <node id="HAIR" />
+    <node id="EYES" />
+    <node id="JACOB MARLEY" />
+    <node id="FIRUZI" />
+    <node id="KROHAARA" />
+    <node id="TIRUZIA" />
+    <node id="ALHAMIA PRISON" />
+    <node id="BRATINAS" />
+    <node id="MEGGIE TAZBAH" />
+    <node id="GHOST" />
+    <node id="SPIRIT" />
+    <node id="FIRST OF THE THREE SPIRITS" />
+    <node id="CHURCH" />
+    <node id="ICICLE" />
+    <node id="UNITED STATES" />
+    <node id="FOG" />
+    <node id="DAYS" />
+    <node id="GHOST OF CHRISTMAS PAST" />
+    <node id="CHRISTMAS PAST" />
+    <node id="BELL" />
+    <node id="ROOM" />
+    <node id="CURTAINS" />
+    <node id="HAND" />
+    <node id="VISITOR" />
+    <node id="CAP" />
+    <node id="LIGHT" />
+    <node id="FLOWERS" />
+    <node id="GLOOM" />
+    <node id="VOICE" />
+    <node id="MARKET-TOWN" />
+    <node id="SPIRIT OF CHRISTMAS PAST" />
+    <node id="SPIRIT OF CHRISTMAS PRESENT" />
+    <node id="SPIRIT OF CHRISTMAS YET TO COME" />
+    <node id="WEATHER" />
+    <node id="COUNTRY ROAD" />
+    <node id="OPEN COUNTRY" />
+    <node id="MANSION" />
+    <node id="LANE" />
+    <node id="CHILD" />
+    <node id="BRIDGE" />
+    <node id="RIVER" />
+    <node id="WEATHER-COCK" />
+    <node id="STABLES" />
+    <node id="COACH-HOUSES" />
+    <node id="SHEDS" />
+    <node id="GATES" />
+    <node id="FOULS" />
+    <node id="WINDOWS" />
+    <node id="HALL" />
+    <node id="PONIES" />
+    <node id="BOYS" />
+    <node id="FARMERS" />
+    <node id="SAMUEL NAMARA" />
+    <node id="DURKE BATAGLANI" />
+    <node id="ALI BABA" />
+    <node id="VALENTINE" />
+    <node id="ORSON" />
+    <node id="SULTAN'S GROOM" />
+    <node id="ROBIN CRUSOE" />
+    <node id="FRIDAY" />
+    <node id="LITTLE GIRL" />
+    <node id="CHRISTMAS CAROL" />
+    <node id="BOY" />
+    <node id="CANDLE LIGHT" />
+    <node id="MICE" />
+    <node id="WATERSPOUT" />
+    <node id="POPLAR" />
+    <node id="STOREHOUSE" />
+    <node id="MAN" />
+    <node id="ASS" />
+    <node id="AXE" />
+    <node id="DESKS" />
+    <node id="BOY READING" />
+    <node id="FORM" />
+    <node id="PLASTER" />
+    <node id="CEILING" />
+    <node id="LATHS" />
+    <node id="PANELS" />
+    <node id="DOOR" />
+    <node id="SCHOOLMASTER" />
+    <node id="FEZZIWIG" />
+    <node id="EBENEZER" />
+    <node id="DICK" />
+    <node id="WAREHOUSE" />
+    <node id="CITY" />
+    <node id="OLD FEZZIWIG" />
+    <node id="FIDDLER" />
+    <node id="SIR ROGER DE COVERLEY" />
+    <node id="HOUSEMAID" />
+    <node id="COOK" />
+    <node id="GIRL" />
+    <node id="BAKER" />
+    <node id="MILKMAN" />
+    <node id="DANCE" />
+    <node id="FORFEITS" />
+    <node id="CAKE" />
+    <node id="NEGUS" />
+    <node id="COLD ROAST" />
+    <node id="COLD BOILED" />
+    <node id="MINCE-PIES" />
+    <node id="BEER" />
+    <node id="GOLDEN" />
+    <node id="DAUGHTER" />
+    <node id="MOTHER" />
+    <node id="CHILDREN" />
+    <node id="FATHER" />
+    <node id="GENTLEMEN" />
+    <node id="STAVE THREE" />
+    <node id="ONE" />
+    <node id="SCROOGE'S ROOM" />
+    <node id="LIVING GREEN" />
+    <node id="TURKEYS, GEESE, GAME" />
+    <node id="JOLLY GIANT" />
+    <node id="SPANISH ONIONS" />
+    <node id="SPANISH FRIARS" />
+    <node id="GIRLS" />
+    <node id="MISTLETOE" />
+    <node id="PEARS" />
+    <node id="APPLES" />
+    <node id="GRAPES" />
+    <node id="SHOPKEEPERS" />
+    <node id="NORFOLK BIFFINS" />
+    <node id="ORANGES" />
+    <node id="LEMONS" />
+    <node id="FISH" />
+    <node id="GROCERS" />
+    <node id="FIGS" />
+    <node id="FRENCH PLUMS" />
+    <node id="TEA" />
+    <node id="COFFEE" />
+    <node id="RAISINS" />
+    <node id="CINNAMON" />
+    <node id="SPICES" />
+    <node id="CANDIED FRUITS" />
+    <node id="ALMONDS" />
+    <node id="CHRISTMAS DAY" />
+    <node id="STEVE" />
+    <node id="CHRISTMAS PRESENT" />
+    <node id="BOB CRATCHIT'S DWELLING" />
+    <node id="THE BAKER'S" />
+    <node id="THE SUBURBS OF THE TOWN" />
+    <node id="MASTER PETER CRATCHIT" />
+    <node id="TINY TIM" />
+    <node id="MARTHA" />
+    <node id="THE GLOBAL EXCHANGE" />
+    <node id="TECHGLOBAL" />
+    <node id="MISS BELINDA" />
+    <node id="MASTER PETER" />
+    <node id="MARATHA" />
+    <node id="PUDDING" />
+    <node id="BACK-YARD" />
+    <node id="CRATCHITS" />
+    <node id="CHRISTMAS PUDDING" />
+    <node id="FEAST" />
+    <node id="FOUNDER OF THE FEAST" />
+    <node id="GROUND" />
+    <node id="FUTURE" />
+    <node id="HEAVEN" />
+    <node id="INSECT" />
+    <node id="NAME" />
+    <node id="PETER" />
+    <node id="SPIRIT'S TORCH" />
+    <node id="LAMPLIGHTER" />
+    <node id="MINERS" />
+    <node id="SHIP" />
+    <node id="LIGHTHOUSE" />
+    <node id="HELMAN" />
+    <node id="LOOK-OUT" />
+    <node id="OFFICERS" />
+    <node id="WATER" />
+    <node id="FROST" />
+    <node id="MOSS" />
+    <node id="MOOR" />
+    <node id="FURZE" />
+    <node id="GRASS" />
+    <node id="WEST" />
+    <node id="SUN" />
+    <node id="LAND" />
+    <node id="ROCKS" />
+    <node id="WALL" />
+    <node id="HUT" />
+    <node id="WOMAN" />
+    <node id="GENERATION" />
+    <node id="OLD MAN" />
+    <node id="CHRISTMAS SONG" />
+    <node id="CHORUS" />
+    <node id="VIGOUR" />
+    <node id="REED" />
+    <node id="ABYSS" />
+    <node id="DEPTH" />
+    <node id="LAUGH" />
+    <node id="GIANTS" />
+    <node id="SCROOGE'S NEPHEW" />
+    <node id="SCROOGE'S NIECE" />
+    <node id="TOPPER" />
+    <node id="UNCLE SCROOGE" />
+    <node id="PLUMP SISTER" />
+    <node id="SEXTON'S SPADE" />
+    <node id="GHOST OF CHRISTMAS PRESENT" />
+    <node id="NEW YEAR" />
+    <node id="THREE-QUARTERS PAST ELEVEN" />
+    <node id="TWELFTH-NIGHT PARTY" />
+    <node id="MULLED WINE" />
+    <node id="GREY HAIR" />
+    <node id="(&quot;ENTITY&quot;" />
+    <node id="CHRISTMAS YET TO COME" />
+    <node id="IGNORANCE" />
+    <node id="WANT" />
+    <node id="MERCHANTS" />
+    <node id="JACOB" />
+    <node id="GHOST OF THE FUTURE" />
+    <node id="CONVERSATION" />
+    <node id="PAST" />
+    <node id="SCRATCH" />
+    <node id="CHRISTMAS-TIME" />
+    <node id="PHANTOM" />
+    <node id="OLD JOE" />
+    <node id="CHARWOMAN" />
+    <node id="LAUNDRESS" />
+    <node id="UNDERTAKER'S MAN" />
+    <node id="BED-CURTAINS" />
+    <node id="CALICO" />
+    <node id="HUSBAND" />
+    <node id="BOB" />
+    <node id="MR. SCROOGE" />
+    <node id="SPIRIT OF TINY TIM" />
+    <node id="GHOST OF CHRISTMAS YET TO COME" />
+    <node id="SPIRITS" />
+    <node id="BEDPOST" />
+    <node id="TIME" />
+    <node id="POULTERER" />
+    <node id="SPIRITS OF CHRISTMAS PAST" />
+    <node id="SPIRITS OF CHRISTMAS YET TO COME" />
+    <node id="CHURCHES" />
+    <node id="MIST" />
+    <node id="CLEAR" />
+    <node id="BRIGHT" />
+    <node id="COLD" />
+    <node id="GOLDEN SUNLIGHT" />
+    <node id="HEAVENLY SKY" />
+    <node id="SWEET FRESH AIR" />
+    <node id="MERRY BELLS" />
+    <node id="TURKEY" />
+    <node id="JOE MILLER" />
+    <node id="STICKING-PLASTER" />
+    <node id="PORTLY GENTLEMAN" />
+    <node id="DINING-ROOM" />
+    <node id="FOOTSTOOL" />
+    <node id="TOTAL-ABSTINENCE PRINCIPLE" />
+    <node id="GOD" />
+    <node id="KNOWLEDGE" />
+    <node id="WISDOM" />
+    <node id="LAUGHTER" />
+    <edge source="BOB CRATCHIT" target="EBENEZER SCROOGE" />
+    <edge source="BOB CRATCHIT" target="PETER CRATCHIT" />
+    <edge source="BOB CRATCHIT" target="TIM CRATCHIT" />
+    <edge source="BOB CRATCHIT" target="MRS. CRATCHIT" />
+    <edge source="BOB CRATCHIT" target="SCROOGE" />
+    <edge source="BOB CRATCHIT" target="MASTER PETER CRATCHIT" />
+    <edge source="BOB CRATCHIT" target="MARTHA" />
+    <edge source="BOB CRATCHIT" target="TINY TIM" />
+    <edge source="BOB CRATCHIT" target="FOUNDER OF THE FEAST" />
+    <edge source="BOB CRATCHIT" target="MOTHER" />
+    <edge source="BOB CRATCHIT" target="PETER" />
+    <edge source="EBENEZER SCROOGE" target="FRED" />
+    <edge source="EBENEZER SCROOGE" target="GHOST OF JACOB MARLEY" />
+    <edge source="EBENEZER SCROOGE" target="BELLE" />
+    <edge source="EBENEZER SCROOGE" target="MRS. DILBER" />
+    <edge source="EBENEZER SCROOGE" target="FAN" />
+    <edge source="EBENEZER SCROOGE" target="FIRST OF THE THREE SPIRITS" />
+    <edge source="EBENEZER SCROOGE" target="SCROOGE" />
+    <edge source="MRS. CRATCHIT" target="BELINDA CRATCHIT" />
+    <edge source="MRS. CRATCHIT" target="MARTHA CRATCHIT" />
+    <edge source="MRS. CRATCHIT" target="TINY TIM" />
+    <edge source="MRS. CRATCHIT" target="MARTHA" />
+    <edge source="MRS. CRATCHIT" target="MISS BELINDA" />
+    <edge source="MRS. CRATCHIT" target="MASTER PETER" />
+    <edge source="MRS. CRATCHIT" target="MARATHA" />
+    <edge source="MRS. CRATCHIT" target="CHRISTMAS PUDDING" />
+    <edge source="MRS. CRATCHIT" target="FEAST" />
+    <edge source="MRS. CRATCHIT" target="SCROOGE" />
+    <edge source="MRS. CRATCHIT" target="BOB" />
+    <edge source="MRS. CRATCHIT" target="CRATCHITS" />
+    <edge source="MRS. CRATCHIT" target="MR. SCROOGE" />
+    <edge source="MR. FEZZIWIG" target="MRS. FEZZIWIG" />
+    <edge source="MRS. FEZZIWIG" target="FEZZIWIG" />
+    <edge source="MRS. FEZZIWIG" target="OLD FEZZIWIG" />
+    <edge source="FRED" target="SCROOGE" />
+    <edge source="FRED" target="MULLED WINE" />
+    <edge source="FRED" target="CHRISTMAS" />
+    <edge source="FRED" target="NEW YEAR" />
+    <edge source="JOE" target="SCROOGE" />
+    <edge source="JOE" target="MRS. DILBER" />
+    <edge source="JOE" target="BED-CURTAINS" />
+    <edge source="SCROOGE" target="MR. TOPPER" />
+    <edge source="SCROOGE" target="DICK WILKINS" />
+    <edge source="SCROOGE" target="BELLE" />
+    <edge source="SCROOGE" target="CAROLINE" />
+    <edge source="SCROOGE" target="MRS. DILBER" />
+    <edge source="SCROOGE" target="FAN" />
+    <edge source="SCROOGE" target="MARLEY" />
+    <edge source="SCROOGE" target="OLD MARLEY" />
+    <edge source="SCROOGE" target="SCROOGE AND MARLEY" />
+    <edge source="SCROOGE" target="NEPHEW" />
+    <edge source="SCROOGE" target="CLERK" />
+    <edge source="SCROOGE" target="CHRISTMAS" />
+    <edge source="SCROOGE" target="BEDLAM" />
+    <edge source="SCROOGE" target="PARLIAMENT" />
+    <edge source="SCROOGE" target="GENTLEMAN" />
+    <edge source="SCROOGE" target="TREADMILL" />
+    <edge source="SCROOGE" target="POOR LAW" />
+    <edge source="SCROOGE" target="UNION WORKHOUSES" />
+    <edge source="SCROOGE" target="COUNTING-HOUSE" />
+    <edge source="SCROOGE" target="MELANCHOLY TAVERN" />
+    <edge source="SCROOGE" target="MELANCHOLY DINER" />
+    <edge source="SCROOGE" target="MELANCHOLY ROOMS" />
+    <edge source="SCROOGE" target="BANKER'S BOOK" />
+    <edge source="SCROOGE" target="CITY OF LONDON" />
+    <edge source="SCROOGE" target="LONDON" />
+    <edge source="SCROOGE" target="CAMDEN TOWN" />
+    <edge source="SCROOGE" target="CHRISTMAS EVE" />
+    <edge source="SCROOGE" target="GENIUS OF THE WEATHER" />
+    <edge source="SCROOGE" target="CORPORATION" />
+    <edge source="SCROOGE" target="ALDERMEN" />
+    <edge source="SCROOGE" target="LIVERY" />
+    <edge source="SCROOGE" target="DUTCH MERCHANT" />
+    <edge source="SCROOGE" target="LOBSTER" />
+    <edge source="SCROOGE" target="KNOCKER" />
+    <edge source="SCROOGE" target="KEY" />
+    <edge source="SCROOGE" target="CANDLE" />
+    <edge source="SCROOGE" target="HEARSE" />
+    <edge source="SCROOGE" target="GAS-LAMPS" />
+    <edge source="SCROOGE" target="ENTRY" />
+    <edge source="SCROOGE" target="DIP" />
+    <edge source="SCROOGE" target="ROOMS" />
+    <edge source="SCROOGE" target="TABLE" />
+    <edge source="SCROOGE" target="SOFA" />
+    <edge source="SCROOGE" target="FIRE" />
+    <edge source="SCROOGE" target="SPOON" />
+    <edge source="SCROOGE" target="BASIN" />
+    <edge source="SCROOGE" target="SAUCEPAN" />
+    <edge source="SCROOGE" target="BED" />
+    <edge source="SCROOGE" target="CLOSET" />
+    <edge source="SCROOGE" target="DRESSING-GOWN" />
+    <edge source="SCROOGE" target="FIRE-GUARD" />
+    <edge source="SCROOGE" target="SHOES" />
+    <edge source="SCROOGE" target="FISH BASKETS" />
+    <edge source="SCROOGE" target="WASHING-STAND" />
+    <edge source="SCROOGE" target="POKER" />
+    <edge source="SCROOGE" target="FUEL" />
+    <edge source="SCROOGE" target="FIREPLACE" />
+    <edge source="SCROOGE" target="DUTCH TILES" />
+    <edge source="SCROOGE" target="SCRIPTURES" />
+    <edge source="SCROOGE" target="CAINS AND ABELS" />
+    <edge source="SCROOGE" target="PHARAOH'S DAUGHTERS" />
+    <edge source="SCROOGE" target="QUEENS OF SHEBA" />
+    <edge source="SCROOGE" target="ANGELIC MESSENGERS" />
+    <edge source="SCROOGE" target="ABRAHAMS" />
+    <edge source="SCROOGE" target="BELSHAZZARS" />
+    <edge source="SCROOGE" target="APOSTLES" />
+    <edge source="SCROOGE" target="BUTTER-BOATS" />
+    <edge source="SCROOGE" target="FIGURES" />
+    <edge source="SCROOGE" target="ANCIENT PROPHET" />
+    <edge source="SCROOGE" target="SMOOTH TILE" />
+    <edge source="SCROOGE" target="BLANK" />
+    <edge source="SCROOGE" target="PICTURE" />
+    <edge source="SCROOGE" target="JACOB MARLEY" />
+    <edge source="SCROOGE" target="GHOST" />
+    <edge source="SCROOGE" target="SPIRIT" />
+    <edge source="SCROOGE" target="MARLEY'S GHOST" />
+    <edge source="SCROOGE" target="FIRST OF THE THREE SPIRITS" />
+    <edge source="SCROOGE" target="CHURCH" />
+    <edge source="SCROOGE" target="ICICLE" />
+    <edge source="SCROOGE" target="UNITED STATES" />
+    <edge source="SCROOGE" target="FOG" />
+    <edge source="SCROOGE" target="DAYS" />
+    <edge source="SCROOGE" target="GHOST OF CHRISTMAS PAST" />
+    <edge source="SCROOGE" target="CHRISTMAS PAST" />
+    <edge source="SCROOGE" target="BELL" />
+    <edge source="SCROOGE" target="ROOM" />
+    <edge source="SCROOGE" target="CURTAINS" />
+    <edge source="SCROOGE" target="MARKET-TOWN" />
+    <edge source="SCROOGE" target="SPIRIT OF CHRISTMAS PAST" />
+    <edge source="SCROOGE" target="SPIRIT OF CHRISTMAS PRESENT" />
+    <edge source="SCROOGE" target="SPIRIT OF CHRISTMAS YET TO COME" />
+    <edge source="SCROOGE" target="WEATHER" />
+    <edge source="SCROOGE" target="COUNTRY ROAD" />
+    <edge source="SCROOGE" target="OPEN COUNTRY" />
+    <edge source="SCROOGE" target="MANSION" />
+    <edge source="SCROOGE" target="LANE" />
+    <edge source="SCROOGE" target="CHILD" />
+    <edge source="SCROOGE" target="ALI BABA" />
+    <edge source="SCROOGE" target="VALENTINE" />
+    <edge source="SCROOGE" target="ORSON" />
+    <edge source="SCROOGE" target="SULTAN'S GROOM" />
+    <edge source="SCROOGE" target="ROBIN CRUSOE" />
+    <edge source="SCROOGE" target="FRIDAY" />
+    <edge source="SCROOGE" target="LITTLE GIRL" />
+    <edge source="SCROOGE" target="CHRISTMAS CAROL" />
+    <edge source="SCROOGE" target="BOY" />
+    <edge source="SCROOGE" target="CANDLE LIGHT" />
+    <edge source="SCROOGE" target="MICE" />
+    <edge source="SCROOGE" target="WATERSPOUT" />
+    <edge source="SCROOGE" target="POPLAR" />
+    <edge source="SCROOGE" target="STOREHOUSE" />
+    <edge source="SCROOGE" target="MAN" />
+    <edge source="SCROOGE" target="ASS" />
+    <edge source="SCROOGE" target="AXE" />
+    <edge source="SCROOGE" target="DESKS" />
+    <edge source="SCROOGE" target="BOY READING" />
+    <edge source="SCROOGE" target="FORM" />
+    <edge source="SCROOGE" target="PLASTER" />
+    <edge source="SCROOGE" target="CEILING" />
+    <edge source="SCROOGE" target="LATHS" />
+    <edge source="SCROOGE" target="PANELS" />
+    <edge source="SCROOGE" target="WINDOWS" />
+    <edge source="SCROOGE" target="DOOR" />
+    <edge source="SCROOGE" target="SCHOOLMASTER" />
+    <edge source="SCROOGE" target="FEZZIWIG" />
+    <edge source="SCROOGE" target="EBENEZER" />
+    <edge source="SCROOGE" target="DICK" />
+    <edge source="SCROOGE" target="WAREHOUSE" />
+    <edge source="SCROOGE" target="OLD FEZZIWIG" />
+    <edge source="SCROOGE" target="GOLDEN" />
+    <edge source="SCROOGE" target="GIRL" />
+    <edge source="SCROOGE" target="GENTLEMEN" />
+    <edge source="SCROOGE" target="STAVE THREE" />
+    <edge source="SCROOGE" target="ONE" />
+    <edge source="SCROOGE" target="SCROOGE'S ROOM" />
+    <edge source="SCROOGE" target="LIVING GREEN" />
+    <edge source="SCROOGE" target="TURKEYS, GEESE, GAME" />
+    <edge source="SCROOGE" target="JOLLY GIANT" />
+    <edge source="SCROOGE" target="CHRISTMAS PRESENT" />
+    <edge source="SCROOGE" target="TINY TIM" />
+    <edge source="SCROOGE" target="GROUND" />
+    <edge source="SCROOGE" target="PETER" />
+    <edge source="SCROOGE" target="MARTHA" />
+    <edge source="SCROOGE" target="CHRISTMAS DAY" />
+    <edge source="SCROOGE" target="SPIRIT'S TORCH" />
+    <edge source="SCROOGE" target="LAMPLIGHTER" />
+    <edge source="SCROOGE" target="SCROOGE'S NEPHEW" />
+    <edge source="SCROOGE" target="SCROOGE'S NIECE" />
+    <edge source="SCROOGE" target="PLUMP SISTER" />
+    <edge source="SCROOGE" target="SEXTON'S SPADE" />
+    <edge source="SCROOGE" target="NEW YEAR" />
+    <edge source="SCROOGE" target="THREE-QUARTERS PAST ELEVEN" />
+    <edge source="SCROOGE" target="TWELFTH-NIGHT PARTY" />
+    <edge source="SCROOGE" target="CHRISTMAS YET TO COME" />
+    <edge source="SCROOGE" target="MERCHANTS" />
+    <edge source="SCROOGE" target="JACOB" />
+    <edge source="SCROOGE" target="GHOST OF THE FUTURE" />
+    <edge source="SCROOGE" target="PHANTOM" />
+    <edge source="SCROOGE" target="OLD JOE" />
+    <edge source="SCROOGE" target="MOTHER" />
+    <edge source="SCROOGE" target="GHOST OF CHRISTMAS YET TO COME" />
+    <edge source="SCROOGE" target="SPIRITS" />
+    <edge source="SCROOGE" target="BEDPOST" />
+    <edge source="SCROOGE" target="TIME" />
+    <edge source="SCROOGE" target="POULTERER" />
+    <edge source="SCROOGE" target="SPIRITS OF CHRISTMAS PAST" />
+    <edge source="SCROOGE" target="SPIRITS OF CHRISTMAS YET TO COME" />
+    <edge source="SCROOGE" target="CHURCHES" />
+    <edge source="SCROOGE" target="MIST" />
+    <edge source="SCROOGE" target="CLEAR" />
+    <edge source="SCROOGE" target="BRIGHT" />
+    <edge source="SCROOGE" target="COLD" />
+    <edge source="SCROOGE" target="GOLDEN SUNLIGHT" />
+    <edge source="SCROOGE" target="HEAVENLY SKY" />
+    <edge source="SCROOGE" target="SWEET FRESH AIR" />
+    <edge source="SCROOGE" target="MERRY BELLS" />
+    <edge source="SCROOGE" target="JOE MILLER" />
+    <edge source="SCROOGE" target="STICKING-PLASTER" />
+    <edge source="SCROOGE" target="GHOST OF CHRISTMAS PRESENT" />
+    <edge source="SCROOGE" target="PORTLY GENTLEMAN" />
+    <edge source="SCROOGE" target="TOPPER" />
+    <edge source="SCROOGE" target="DINING-ROOM" />
+    <edge source="SCROOGE" target="FOOTSTOOL" />
+    <edge source="MRS. DILBER" target="OLD JOE" />
+    <edge source="MARLEY" target="LIBERALITY" />
+    <edge source="MARLEY" target="GHOSTLY SPECTACLES" />
+    <edge source="MARLEY" target="HAIR" />
+    <edge source="MARLEY" target="EYES" />
+    <edge source="STAVE ONE" target="MARLEY'S GHOST" />
+    <edge source="MARLEY'S GHOST" target="GHOST" />
+    <edge source="HAMLET" target="ST. PAUL'S CHURCHYARD" />
+    <edge source="NEPHEW" target="CLERK" />
+    <edge source="NEPHEW" target="SPIRIT" />
+    <edge source="NEPHEW" target="LAUGH" />
+    <edge source="NEPHEW" target="ROOM" />
+    <edge source="CHRISTMAS" target="SPIRIT" />
+    <edge source="CHRISTMAS" target="CITY" />
+    <edge source="CHRISTMAS" target="CRATCHITS" />
+    <edge source="CHRISTMAS" target="SCROOGE'S NEPHEW" />
+    <edge source="CHRISTMAS" target="(&quot;ENTITY&quot;" />
+    <edge source="CHRISTMAS" target="TOTAL-ABSTINENCE PRINCIPLE" />
+    <edge source="CHRISTMAS" target="TINY TIM" />
+    <edge source="ST. DUNSTAN" target="EVIL SPIRIT" />
+    <edge source="LONDON" target="SPIRIT" />
+    <edge source="ROOMS" target="MANSION" />
+    <edge source="FIRE" target="HUT" />
+    <edge source="FIRE" target="WOMAN" />
+    <edge source="FIRE" target="CHILDREN" />
+    <edge source="FIRE" target="GENERATION" />
+    <edge source="FIRUZI" target="KROHAARA" />
+    <edge source="KROHAARA" target="TIRUZIA" />
+    <edge source="TIRUZIA" target="ALHAMIA PRISON" />
+    <edge source="BRATINAS" target="MEGGIE TAZBAH" />
+    <edge source="MEGGIE TAZBAH" target="SAMUEL NAMARA" />
+    <edge source="MEGGIE TAZBAH" target="DURKE BATAGLANI" />
+    <edge source="GHOST" target="WAREHOUSE" />
+    <edge source="GHOST" target="EBENEZER" />
+    <edge source="GHOST" target="GIRL" />
+    <edge source="GHOST" target="FUTURE" />
+    <edge source="SPIRIT" target="VISITOR" />
+    <edge source="SPIRIT" target="CAP" />
+    <edge source="SPIRIT" target="LIGHT" />
+    <edge source="SPIRIT" target="FLOWERS" />
+    <edge source="SPIRIT" target="GLOOM" />
+    <edge source="SPIRIT" target="VOICE" />
+    <edge source="SPIRIT" target="MOTHER" />
+    <edge source="SPIRIT" target="DAUGHTER" />
+    <edge source="SPIRIT" target="CHILDREN" />
+    <edge source="SPIRIT" target="BOB CRATCHIT'S DWELLING" />
+    <edge source="SPIRIT" target="THE BAKER'S" />
+    <edge source="SPIRIT" target="THE SUBURBS OF THE TOWN" />
+    <edge source="SPIRIT" target="HEAVEN" />
+    <edge source="SPIRIT" target="MINERS" />
+    <edge source="SPIRIT" target="SHIP" />
+    <edge source="SPIRIT" target="MULLED WINE" />
+    <edge source="SPIRIT" target="NEW YEAR" />
+    <edge source="SPIRIT" target="GREY HAIR" />
+    <edge source="CHURCH" target="MARKET-TOWN" />
+    <edge source="GHOST OF CHRISTMAS PAST" target="CHRISTMAS PAST" />
+    <edge source="GHOST OF CHRISTMAS PAST" target="UNCLE SCROOGE" />
+    <edge source="GHOST OF CHRISTMAS PAST" target="SCROOGE'S NIECE" />
+    <edge source="BELL" target="MANSION" />
+    <edge source="HAND" target="VISITOR" />
+    <edge source="MARKET-TOWN" target="BRIDGE" />
+    <edge source="MARKET-TOWN" target="RIVER" />
+    <edge source="MANSION" target="WEATHER-COCK" />
+    <edge source="MANSION" target="STABLES" />
+    <edge source="MANSION" target="COACH-HOUSES" />
+    <edge source="MANSION" target="SHEDS" />
+    <edge source="MANSION" target="GATES" />
+    <edge source="MANSION" target="FOULS" />
+    <edge source="MANSION" target="WINDOWS" />
+    <edge source="MANSION" target="HALL" />
+    <edge source="PONIES" target="BOYS" />
+    <edge source="BOYS" target="FARMERS" />
+    <edge source="SAMUEL NAMARA" target="DURKE BATAGLANI" />
+    <edge source="BOY" target="GIRL" />
+    <edge source="MAN" target="SPIRITS" />
+    <edge source="MAN" target="KNOWLEDGE" />
+    <edge source="MAN" target="WISDOM" />
+    <edge source="MAN" target="LAUGHTER" />
+    <edge source="FEZZIWIG" target="FIDDLER" />
+    <edge source="FEZZIWIG" target="SIR ROGER DE COVERLEY" />
+    <edge source="FEZZIWIG" target="DICK" />
+    <edge source="CITY" target="MERCHANTS" />
+    <edge source="OLD FEZZIWIG" target="FIDDLER" />
+    <edge source="OLD FEZZIWIG" target="SIR ROGER DE COVERLEY" />
+    <edge source="HOUSEMAID" target="COOK" />
+    <edge source="GIRL" target="DAUGHTER" />
+    <edge source="BAKER" target="MILKMAN" />
+    <edge source="DANCE" target="FORFEITS" />
+    <edge source="CAKE" target="NEGUS" />
+    <edge source="COLD ROAST" target="COLD BOILED" />
+    <edge source="MINCE-PIES" target="BEER" />
+    <edge source="DAUGHTER" target="MOTHER" />
+    <edge source="DAUGHTER" target="CHILDREN" />
+    <edge source="DAUGHTER" target="FATHER" />
+    <edge source="MOTHER" target="CHILDREN" />
+    <edge source="MOTHER" target="FATHER" />
+    <edge source="MOTHER" target="HUSBAND" />
+    <edge source="MOTHER" target="TINY TIM" />
+    <edge source="MOTHER" target="PETER" />
+    <edge source="SPANISH ONIONS" target="SPANISH FRIARS" />
+    <edge source="SPANISH ONIONS" target="GIRLS" />
+    <edge source="SPANISH ONIONS" target="MISTLETOE" />
+    <edge source="PEARS" target="APPLES" />
+    <edge source="PEARS" target="GRAPES" />
+    <edge source="PEARS" target="SHOPKEEPERS" />
+    <edge source="APPLES" target="GRAPES" />
+    <edge source="APPLES" target="SHOPKEEPERS" />
+    <edge source="GRAPES" target="SHOPKEEPERS" />
+    <edge source="SHOPKEEPERS" target="NORFOLK BIFFINS" />
+    <edge source="SHOPKEEPERS" target="ORANGES" />
+    <edge source="SHOPKEEPERS" target="LEMONS" />
+    <edge source="NORFOLK BIFFINS" target="ORANGES" />
+    <edge source="NORFOLK BIFFINS" target="LEMONS" />
+    <edge source="ORANGES" target="LEMONS" />
+    <edge source="FISH" target="GROCERS" />
+    <edge source="GROCERS" target="FIGS" />
+    <edge source="GROCERS" target="FRENCH PLUMS" />
+    <edge source="FIGS" target="FRENCH PLUMS" />
+    <edge source="TEA" target="COFFEE" />
+    <edge source="TEA" target="RAISINS" />
+    <edge source="TEA" target="CINNAMON" />
+    <edge source="TEA" target="SPICES" />
+    <edge source="TEA" target="CANDIED FRUITS" />
+    <edge source="COFFEE" target="RAISINS" />
+    <edge source="COFFEE" target="ALMONDS" />
+    <edge source="COFFEE" target="CINNAMON" />
+    <edge source="COFFEE" target="SPICES" />
+    <edge source="COFFEE" target="CANDIED FRUITS" />
+    <edge source="RAISINS" target="ALMONDS" />
+    <edge source="RAISINS" target="CINNAMON" />
+    <edge source="RAISINS" target="SPICES" />
+    <edge source="RAISINS" target="CANDIED FRUITS" />
+    <edge source="CINNAMON" target="ALMONDS" />
+    <edge source="CINNAMON" target="SPICES" />
+    <edge source="CINNAMON" target="CANDIED FRUITS" />
+    <edge source="SPICES" target="ALMONDS" />
+    <edge source="SPICES" target="CANDIED FRUITS" />
+    <edge source="CANDIED FRUITS" target="ALMONDS" />
+    <edge source="CHRISTMAS DAY" target="STEVE" />
+    <edge source="CHRISTMAS DAY" target="PUDDING" />
+    <edge source="TINY TIM" target="BOB" />
+    <edge source="TINY TIM" target="CRATCHITS" />
+    <edge source="TINY TIM" target="MR. SCROOGE" />
+    <edge source="TINY TIM" target="GOD" />
+    <edge source="THE GLOBAL EXCHANGE" target="TECHGLOBAL" />
+    <edge source="PUDDING" target="BACK-YARD" />
+    <edge source="CRATCHITS" target="BOB" />
+    <edge source="CRATCHITS" target="PETER" />
+    <edge source="CRATCHITS" target="SPIRIT OF TINY TIM" />
+    <edge source="GROUND" target="NAME" />
+    <edge source="HEAVEN" target="INSECT" />
+    <edge source="SHIP" target="LIGHTHOUSE" />
+    <edge source="SHIP" target="HELMAN" />
+    <edge source="SHIP" target="LOOK-OUT" />
+    <edge source="SHIP" target="OFFICERS" />
+    <edge source="WATER" target="FROST" />
+    <edge source="MOSS" target="MOOR" />
+    <edge source="MOOR" target="FURZE" />
+    <edge source="MOOR" target="GRASS" />
+    <edge source="MOOR" target="GIANTS" />
+    <edge source="WEST" target="SUN" />
+    <edge source="SUN" target="LAND" />
+    <edge source="LAND" target="ROCKS" />
+    <edge source="WALL" target="HUT" />
+    <edge source="WOMAN" target="LAUNDRESS" />
+    <edge source="WOMAN" target="OLD JOE" />
+    <edge source="WOMAN" target="CALICO" />
+    <edge source="OLD MAN" target="CHRISTMAS SONG" />
+    <edge source="CHRISTMAS SONG" target="CHORUS" />
+    <edge source="CHRISTMAS SONG" target="VIGOUR" />
+    <edge source="REED" target="ABYSS" />
+    <edge source="ABYSS" target="DEPTH" />
+    <edge source="SCROOGE'S NEPHEW" target="SCROOGE'S NIECE" />
+    <edge source="SCROOGE'S NIECE" target="TOPPER" />
+    <edge source="PLUMP SISTER" target="GHOST OF CHRISTMAS PRESENT" />
+    <edge source="IGNORANCE" target="WANT" />
+    <edge source="MERCHANTS" target="CONVERSATION" />
+    <edge source="JACOB" target="PAST" />
+    <edge source="JACOB" target="SCRATCH" />
+    <edge source="SCRATCH" target="CHRISTMAS-TIME" />
+    <edge source="OLD JOE" target="CHARWOMAN" />
+    <edge source="OLD JOE" target="LAUNDRESS" />
+    <edge source="OLD JOE" target="UNDERTAKER'S MAN" />
+    <edge source="OLD JOE" target="CALICO" />
+    <edge source="BOB" target="MR. SCROOGE" />
+    <edge source="BOB" target="SPIRIT OF TINY TIM" />
+    <edge source="SPIRITS" target="TOTAL-ABSTINENCE PRINCIPLE" />
+    <edge source="POULTERER" target="TURKEY" />
+  </graph>
+</graphml>

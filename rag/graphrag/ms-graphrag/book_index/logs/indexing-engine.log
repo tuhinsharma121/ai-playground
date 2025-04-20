@@ -1,0 +1,610 @@
+17:21:03,988 graphrag.cli.index INFO Logging enabled at /Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index/logs/indexing-engine.log
+17:21:04,764 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:05,230 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:21:05,236 graphrag.cli.index INFO Starting pipeline run. dry_run=False
+17:21:05,237 graphrag.cli.index INFO Using default configuration: {
+    "root_dir": "/Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index",
+    "models": {
+        "default_chat_model": {
+            "api_key": "==== REDACTED ====",
+            "auth_type": "api_key",
+            "type": "openai_chat",
+            "model": "gpt-3.5-turbo",
+            "encoding_model": "cl100k_base",
+            "max_tokens": 4000,
+            "temperature": 0,
+            "top_p": 1,
+            "n": 1,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.0,
+            "request_timeout": 180.0,
+            "api_base": null,
+            "api_version": null,
+            "deployment_name": null,
+            "proxy": null,
+            "audience": null,
+            "model_supports_json": true,
+            "tokens_per_minute": 0,
+            "requests_per_minute": 0,
+            "retry_strategy": "native",
+            "max_retries": 10,
+            "max_retry_wait": 10.0,
+            "concurrent_requests": 25,
+            "responses": null,
+            "async_mode": "threaded"
+        },
+        "default_embedding_model": {
+            "api_key": "==== REDACTED ====",
+            "auth_type": "api_key",
+            "type": "openai_embedding",
+            "model": "text-embedding-3-small",
+            "encoding_model": "cl100k_base",
+            "max_tokens": 4000,
+            "temperature": 0,
+            "top_p": 1,
+            "n": 1,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.0,
+            "request_timeout": 180.0,
+            "api_base": null,
+            "api_version": null,
+            "deployment_name": null,
+            "proxy": null,
+            "audience": null,
+            "model_supports_json": true,
+            "tokens_per_minute": 0,
+            "requests_per_minute": 0,
+            "retry_strategy": "native",
+            "max_retries": 10,
+            "max_retry_wait": 10.0,
+            "concurrent_requests": 25,
+            "responses": null,
+            "async_mode": "threaded"
+        }
+    },
+    "reporting": {
+        "type": "file",
+        "base_dir": "/Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index/logs",
+        "storage_account_blob_url": null
+    },
+    "output": {
+        "type": "file",
+        "base_dir": "/Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index/output",
+        "storage_account_blob_url": null,
+        "cosmosdb_account_url": null
+    },
+    "outputs": null,
+    "update_index_output": {
+        "type": "file",
+        "base_dir": "/Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index/update_output",
+        "storage_account_blob_url": null,
+        "cosmosdb_account_url": null
+    },
+    "cache": {
+        "type": "file",
+        "base_dir": "cache",
+        "storage_account_blob_url": null,
+        "cosmosdb_account_url": null
+    },
+    "input": {
+        "type": "file",
+        "file_type": "text",
+        "base_dir": "input",
+        "storage_account_blob_url": null,
+        "encoding": "utf-8",
+        "file_pattern": ".*\\.txt$",
+        "file_filter": null,
+        "text_column": "text",
+        "title_column": null,
+        "metadata": null
+    },
+    "embed_graph": {
+        "enabled": false,
+        "dimensions": 1536,
+        "num_walks": 10,
+        "walk_length": 40,
+        "window_size": 2,
+        "iterations": 3,
+        "random_seed": 597832,
+        "use_lcc": true
+    },
+    "embed_text": {
+        "batch_size": 16,
+        "batch_max_tokens": 8191,
+        "target": "required",
+        "names": [],
+        "strategy": null,
+        "model_id": "default_embedding_model",
+        "vector_store_id": "default_vector_store"
+    },
+    "chunks": {
+        "size": 1024,
+        "overlap": 20,
+        "group_by_columns": [
+            "id"
+        ],
+        "strategy": "tokens",
+        "encoding_model": "cl100k_base",
+        "prepend_metadata": false,
+        "chunk_size_includes_metadata": false
+    },
+    "snapshots": {
+        "embeddings": false,
+        "graphml": true
+    },
+    "extract_graph": {
+        "prompt": "prompts/extract_graph.txt",
+        "entity_types": [
+            "organization",
+            "person",
+            "geo",
+            "event"
+        ],
+        "max_gleanings": 1,
+        "strategy": null,
+        "encoding_model": null,
+        "model_id": "default_chat_model"
+    },
+    "extract_graph_nlp": {
+        "normalize_edge_weights": true,
+        "text_analyzer": {
+            "extractor_type": "regex_english",
+            "model_name": "en_core_web_md",
+            "max_word_length": 15,
+            "word_delimiter": " ",
+            "include_named_entities": true,
+            "exclude_nouns": null,
+            "exclude_entity_tags": [
+                "DATE"
+            ],
+            "exclude_pos_tags": [
+                "DET",
+                "PRON",
+                "INTJ",
+                "X"
+            ],
+            "noun_phrase_tags": [
+                "PROPN",
+                "NOUNS"
+            ],
+            "noun_phrase_grammars": {
+                "PROPN,PROPN": "PROPN",
+                "NOUN,NOUN": "NOUNS",
+                "NOUNS,NOUN": "NOUNS",
+                "ADJ,ADJ": "ADJ",
+                "ADJ,NOUN": "NOUNS"
+            }
+        },
+        "concurrent_requests": 25
+    },
+    "summarize_descriptions": {
+        "prompt": "prompts/summarize_descriptions.txt",
+        "max_length": 500,
+        "strategy": null,
+        "model_id": "default_chat_model"
+    },
+    "community_reports": {
+        "graph_prompt": "prompts/community_report_graph.txt",
+        "text_prompt": "prompts/community_report_text.txt",
+        "max_length": 2000,
+        "max_input_length": 8000,
+        "strategy": null,
+        "model_id": "default_chat_model"
+    },
+    "extract_claims": {
+        "enabled": false,
+        "prompt": "prompts/extract_claims.txt",
+        "description": "Any claims or facts that could be relevant to information discovery.",
+        "max_gleanings": 1,
+        "strategy": null,
+        "encoding_model": null,
+        "model_id": "default_chat_model"
+    },
+    "prune_graph": {
+        "min_node_freq": 2,
+        "max_node_freq_std": null,
+        "min_node_degree": 1,
+        "max_node_degree_std": null,
+        "min_edge_weight_pct": 40,
+        "remove_ego_nodes": false,
+        "lcc_only": false
+    },
+    "cluster_graph": {
+        "max_cluster_size": 10,
+        "use_lcc": true,
+        "seed": 3735928559
+    },
+    "umap": {
+        "enabled": false
+    },
+    "local_search": {
+        "prompt": "prompts/local_search_system_prompt.txt",
+        "chat_model_id": "default_chat_model",
+        "embedding_model_id": "default_embedding_model",
+        "text_unit_prop": 0.5,
+        "community_prop": 0.15,
+        "conversation_history_max_turns": 5,
+        "top_k_entities": 10,
+        "top_k_relationships": 10,
+        "temperature": 0,
+        "top_p": 1,
+        "n": 1,
+        "max_tokens": 12000,
+        "llm_max_tokens": 2000
+    },
+    "global_search": {
+        "map_prompt": "prompts/global_search_map_system_prompt.txt",
+        "reduce_prompt": "prompts/global_search_reduce_system_prompt.txt",
+        "chat_model_id": "default_chat_model",
+        "knowledge_prompt": "prompts/global_search_knowledge_system_prompt.txt",
+        "temperature": 0,
+        "top_p": 1,
+        "n": 1,
+        "max_tokens": 12000,
+        "data_max_tokens": 12000,
+        "map_max_tokens": 1000,
+        "reduce_max_tokens": 2000,
+        "concurrency": 32,
+        "dynamic_search_llm": "gpt-4o-mini",
+        "dynamic_search_threshold": 1,
+        "dynamic_search_keep_parent": false,
+        "dynamic_search_num_repeats": 1,
+        "dynamic_search_use_summary": false,
+        "dynamic_search_concurrent_coroutines": 16,
+        "dynamic_search_max_level": 2
+    },
+    "drift_search": {
+        "prompt": "prompts/drift_search_system_prompt.txt",
+        "reduce_prompt": "prompts/drift_search_reduce_prompt.txt",
+        "chat_model_id": "default_chat_model",
+        "embedding_model_id": "default_embedding_model",
+        "temperature": 0,
+        "top_p": 1,
+        "n": 1,
+        "max_tokens": 12000,
+        "data_max_tokens": 12000,
+        "reduce_max_tokens": 2000,
+        "reduce_temperature": 0,
+        "concurrency": 32,
+        "drift_k_followups": 20,
+        "primer_folds": 5,
+        "primer_llm_max_tokens": 12000,
+        "n_depth": 3,
+        "local_search_text_unit_prop": 0.9,
+        "local_search_community_prop": 0.1,
+        "local_search_top_k_mapped_entities": 10,
+        "local_search_top_k_relationships": 10,
+        "local_search_max_data_tokens": 12000,
+        "local_search_temperature": 0,
+        "local_search_top_p": 1,
+        "local_search_n": 1,
+        "local_search_llm_max_gen_tokens": 4096
+    },
+    "basic_search": {
+        "prompt": "prompts/basic_search_system_prompt.txt",
+        "chat_model_id": "default_chat_model",
+        "embedding_model_id": "default_embedding_model",
+        "text_unit_prop": 0.5,
+        "conversation_history_max_turns": 5,
+        "temperature": 0,
+        "top_p": 1,
+        "n": 1,
+        "max_tokens": 12000,
+        "llm_max_tokens": 2000
+    },
+    "vector_store": {
+        "default_vector_store": {
+            "type": "lancedb",
+            "db_uri": "/Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index/output/lancedb",
+            "url": null,
+            "audience": null,
+            "container_name": "==== REDACTED ====",
+            "database_name": null,
+            "overwrite": true
+        }
+    },
+    "workflows": null
+}
+17:21:05,238 graphrag.storage.file_pipeline_storage INFO Creating file storage at /Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index/output
+17:21:05,239 graphrag.index.input.factory INFO loading input from root_dir=input
+17:21:05,239 graphrag.index.input.factory INFO using file storage for input
+17:21:05,240 graphrag.storage.file_pipeline_storage INFO search /Users/tuhinsharma/Documents/Git/ai-playground/rag/graphrag/ms-graphrag/book_index/input for files matching .*\.txt$
+17:21:05,243 graphrag.index.input.util INFO Found 1 InputFileType.text files, loading 1
+17:21:05,243 graphrag.index.input.util INFO Total number of unfiltered InputFileType.text rows: 1
+17:21:05,245 graphrag.index.run.run_pipeline INFO Final # of rows loaded: 1
+17:21:05,254 graphrag.utils.storage INFO reading table from storage: documents.parquet
+17:21:05,304 graphrag.utils.storage INFO reading table from storage: documents.parquet
+17:21:05,305 graphrag.utils.storage INFO reading table from storage: text_units.parquet
+17:21:05,320 graphrag.utils.storage INFO reading table from storage: text_units.parquet
+17:21:07,200 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:07,228 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:07,391 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:07,428 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:07,551 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:07,598 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:07,614 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,46 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,59 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,97 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,265 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,291 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,372 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,378 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,942 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:08,955 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:09,17 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:09,464 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:09,786 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:09,876 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:09,906 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:10,583 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:10,585 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:10,789 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:11,194 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:11,392 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:11,499 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:11,580 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:12,266 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:12,290 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:12,302 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:12,899 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:12,922 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:13,116 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:13,348 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:13,623 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,123 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,502 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,545 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,584 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,615 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,643 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,738 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:14,936 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:15,453 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:15,613 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:15,660 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:15,900 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:16,341 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:16,929 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:16,933 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:16,935 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:16,983 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:17,337 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:17,951 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:18,63 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:18,566 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:18,764 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:19,51 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:19,52 openai._base_client INFO Retrying request to /chat/completions in 0.196000 seconds
+17:21:19,198 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:19,212 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:19,514 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:19,516 openai._base_client INFO Retrying request to /chat/completions in 0.019000 seconds
+17:21:19,586 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:19,661 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:19,807 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:19,808 openai._base_client INFO Retrying request to /chat/completions in 0.054000 seconds
+17:21:20,167 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:20,735 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:20,743 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:21,34 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:21,36 openai._base_client INFO Retrying request to /chat/completions in 1.105000 seconds
+17:21:21,254 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:21,538 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:21,815 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:21,817 openai._base_client INFO Retrying request to /chat/completions in 0.416000 seconds
+17:21:22,408 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:22,410 openai._base_client INFO Retrying request to /chat/completions in 0.129000 seconds
+17:21:22,796 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:22,814 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:22,816 openai._base_client INFO Retrying request to /chat/completions in 0.661000 seconds
+17:21:23,743 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+17:21:23,746 openai._base_client INFO Retrying request to /chat/completions in 0.213000 seconds
+17:21:25,107 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:25,603 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:26,554 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:26,676 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:26,728 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:27,269 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:31,247 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:32,472 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:40,581 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:43,175 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:44,504 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:50,618 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:21:54,131 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:20,397 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,339 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,344 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,347 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,349 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,354 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,390 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,406 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,424 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,493 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,515 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,524 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,544 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,611 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,648 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,655 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,657 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,657 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,684 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,685 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,866 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,877 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:21,972 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,24 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,59 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,96 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,153 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,172 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,201 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,218 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,248 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,318 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,385 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,395 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,403 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,414 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,429 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,453 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,466 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,508 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,531 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,562 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,604 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,703 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,720 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,728 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,753 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,754 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,881 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,903 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,950 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,973 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:22,984 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:23,31 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:23,90 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:23,127 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:23,164 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:23,177 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:23,354 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:23,822 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:25,229 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:25,947 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:25,948 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:25,976 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:25,985 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,2 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,30 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,79 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,97 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,102 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,123 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,131 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,137 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,249 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,256 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,322 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,409 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,469 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,480 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,498 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,553 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,568 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,588 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,755 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,773 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,797 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,800 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,817 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,821 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,825 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,889 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,916 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:26,983 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,27 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,31 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,64 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,70 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,119 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,216 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,219 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,309 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:27,693 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:30,39 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:30,108 graphrag.utils.storage INFO reading table from storage: entities.parquet
+17:22:30,110 graphrag.utils.storage INFO reading table from storage: relationships.parquet
+17:22:30,144 graphrag.utils.storage INFO reading table from storage: entities.parquet
+17:22:30,146 graphrag.utils.storage INFO reading table from storage: relationships.parquet
+17:22:30,190 graphrag.utils.storage INFO reading table from storage: text_units.parquet
+17:22:30,192 graphrag.utils.storage INFO reading table from storage: entities.parquet
+17:22:30,193 graphrag.utils.storage INFO reading table from storage: relationships.parquet
+17:22:30,230 graphrag.utils.storage INFO reading table from storage: relationships.parquet
+17:22:30,231 graphrag.utils.storage INFO reading table from storage: entities.parquet
+17:22:30,233 graphrag.utils.storage INFO reading table from storage: communities.parquet
+17:22:30,238 graphrag.index.operations.summarize_communities.graph_context.context_builder INFO Number of nodes at level=1 => 211
+17:22:30,438 graphrag.index.operations.summarize_communities.graph_context.context_builder INFO Number of nodes at level=0 => 275
+17:22:33,718 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:34,644 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:35,163 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:35,499 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:35,548 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,43 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,101 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,142 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,290 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,428 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,491 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,801 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:36,823 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:37,43 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:37,539 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:38,182 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:41,704 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:41,826 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:41,936 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:42,991 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:43,47 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:43,214 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:43,708 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:43,730 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:44,411 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:44,484 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:44,593 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:45,134 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:45,260 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:45,817 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:45,917 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:47,116 httpx INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+17:22:47,215 graphrag.utils.storage INFO reading table from storage: documents.parquet
+17:22:47,217 graphrag.utils.storage INFO reading table from storage: relationships.parquet
+17:22:47,219 graphrag.utils.storage INFO reading table from storage: text_units.parquet
+17:22:47,221 graphrag.utils.storage INFO reading table from storage: entities.parquet
+17:22:47,223 graphrag.utils.storage INFO reading table from storage: community_reports.parquet
+17:22:47,226 graphrag.index.workflows.generate_text_embeddings INFO Creating embeddings
+17:22:47,226 graphrag.index.operations.embed_text.embed_text INFO using vector store lancedb with container_name default for embedding text_unit.text: default-text_unit-text
+17:22:47,252 graphrag.index.operations.embed_text.strategies.openai INFO embedding 41 inputs via 41 snippets using 6 batches. max_batch_size=16, max_tokens=8191
+17:22:47,861 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:47,937 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:47,943 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:48,15 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:48,19 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:48,374 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:48,918 graphrag.index.operations.embed_text.embed_text INFO using vector store lancedb with container_name default for embedding entity.description: default-entity-description
+17:22:48,924 graphrag.index.operations.embed_text.strategies.openai INFO embedding 425 inputs via 425 snippets using 27 batches. max_batch_size=16, max_tokens=8191
+17:22:49,438 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,445 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,458 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,475 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,492 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,503 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,510 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,515 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,571 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,578 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,588 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,615 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,628 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,633 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,640 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,657 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,669 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,672 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,719 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,729 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:49,986 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:50,47 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:50,155 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:50,460 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:50,725 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:50,845 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:52,468 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:52,533 graphrag.index.operations.embed_text.embed_text INFO using vector store lancedb with container_name default for embedding community.full_content: default-community-full_content
+17:22:52,542 graphrag.index.operations.embed_text.strategies.openai INFO embedding 32 inputs via 32 snippets using 2 batches. max_batch_size=16, max_tokens=8191
+17:22:53,184 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:54,210 httpx INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+17:22:55,39 graphrag.cli.index INFO All workflows completed successfully.
