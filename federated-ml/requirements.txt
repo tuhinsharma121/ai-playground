@@ -3,4 +3,4 @@ plotly==4.1.1
 scikit-learn==0.21.3
 syft==0.1.28a1
 torch==1.1.0
-zstd==1.4.3.2
+zstd==1.5.4.0
