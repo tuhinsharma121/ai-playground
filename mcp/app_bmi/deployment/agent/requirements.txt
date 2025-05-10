@@ -1,0 +1,8 @@
+pandas==2.2.3
+llama-index==0.12.34
+fastapi==0.115.12
+uvicorn==0.34.2
+mcp[cli]==1.7.1
+uv==0.7.2
+langchain_community==0.3.23
+scikit-learn==1.6.1

@@ -1,0 +1,9 @@
+fastapi==0.115.9
+uvicorn==0.34.2
+mcp[cli]==1.6.0
+langchain_mcp_adapters==0.0.9
+langchain_openai==0.3.16
+langgraph==0.4.1
+llama-index==0.12.34
+langchain-google-vertexai==2.0.21
+langchain_google_genai==2.1.4
