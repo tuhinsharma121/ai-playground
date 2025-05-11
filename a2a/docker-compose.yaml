@@ -1,0 +1,83 @@
+services:
+  agent_websearch:
+    build:
+      context: "."
+      dockerfile: agent_websearch/deployment/Dockerfile
+    image: agent_websearch:latest
+    container_name: "agent_websearch"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - PORT=10000
+      - HOST=agent_websearch
+    ports:
+      - "10000:10000"
+  agent_bmi:
+    build:
+      context: "."
+      dockerfile: agent_bmi/deployment/Dockerfile
+    image: agent_bmi:latest
+    container_name: "agent_bmi"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - PORT=10001
+      - HOST=agent_bmi
+    ports:
+      - "10001:10001"
+  agent_email:
+    build:
+      context: "."
+      dockerfile: agent_email/deployment/Dockerfile
+    image: agent_email:latest
+    container_name: "agent_email"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - PORT=10002
+      - HOST=agent_email
+    ports:
+      - "10002:10002"
+  ui:
+    build:
+      context: "."
+      dockerfile: ui/deployment/Dockerfile
+    image: ui:latest
+    container_name: "ui"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - UI_PORT=12000
+    ports:
+      - "12000:12000"
+networks:
+  dataverse_ai_nw: { }
