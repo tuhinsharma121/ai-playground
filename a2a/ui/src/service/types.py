@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from ui.src.common.types import (
+from common.types import (
     AgentCard,
     JSONRPCRequest,
     JSONRPCResponse,

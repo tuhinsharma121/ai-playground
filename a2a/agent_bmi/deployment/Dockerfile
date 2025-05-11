@@ -21,6 +21,7 @@ RUN pip3 install -r /requirements.txt
 
 COPY agent_bmi /agent_bmi
 COPY agent_bmi/src/main.py /main.py
+COPY common /common
 COPY pylogger.py /pylogger.py
 
 # --------------------------------------------------------------------------------------------------

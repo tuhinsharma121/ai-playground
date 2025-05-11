@@ -2,7 +2,7 @@ import uuid
 
 import mesop as me
 
-from ui.src.common.types import Message, TextPart
+from common.types import Message, TextPart
 from ui.src.state.host_agent_service import (
     ListConversations,
     SendMessage,

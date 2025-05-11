@@ -4,7 +4,7 @@ import os
 import threading
 import uuid
 
-from ui.src.common.types import FileContent, FilePart, Message
+from common.types import FileContent, FilePart, Message
 from fastapi import APIRouter, Request, Response
 from ui.src.service.types import (
     CreateConversationResponse,

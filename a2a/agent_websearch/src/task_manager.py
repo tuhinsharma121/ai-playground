@@ -5,9 +5,9 @@ import traceback
 from collections.abc import AsyncIterable
 
 from agent_websearch.src.agent import WebsearchAgent
-from agent_websearch.src.common.server import utils
-from agent_websearch.src.common.server.task_manager import InMemoryTaskManager
-from agent_websearch.src.common.types import (
+from common.server import utils
+from common.server.task_manager import InMemoryTaskManager
+from common.types import (
     Artifact,
     InternalError,
     InvalidParamsError,
@@ -27,7 +27,7 @@ from agent_websearch.src.common.types import (
     TaskStatusUpdateEvent,
     TextPart,
 )
-from agent_websearch.src.common.utils.push_notification_auth import PushNotificationSenderAuth
+from common.utils.push_notification_auth import PushNotificationSenderAuth
 
 
 logger = logging.getLogger(__name__)

@@ -21,6 +21,7 @@ RUN pip3 install -r /requirements.txt
 
 COPY ui /ui
 COPY ui/src/main.py /main.py
+COPY common /common
 COPY pylogger.py /pylogger.py
 
 # --------------------------------------------------------------------------------------------------

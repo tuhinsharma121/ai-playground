@@ -2,8 +2,8 @@ import uuid
 
 from collections.abc import Callable
 
-from ui.src.common.client import A2AClient
-from ui.src.common.types import (
+from common.client import A2AClient
+from common.types import (
     AgentCard,
     Task,
     TaskArtifactUpdateEvent,

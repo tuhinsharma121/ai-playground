@@ -21,6 +21,7 @@ RUN pip3 install -r /requirements.txt
 
 COPY agent_email /agent_email
 COPY agent_email/src/main.py /main.py
+COPY common /common
 COPY pylogger.py /pylogger.py
 
 # --------------------------------------------------------------------------------------------------

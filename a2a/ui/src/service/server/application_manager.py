@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ui.src.common.types import AgentCard, Message, Task
+from common.types import AgentCard, Message, Task
 from ui.src.service.types import Conversation, Event
 
 

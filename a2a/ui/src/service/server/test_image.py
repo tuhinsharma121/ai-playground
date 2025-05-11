@@ -1,4 +1,4 @@
-from ui.src.common.types import (
+from common.types import (
     FileContent,
     FilePart,
     Message,

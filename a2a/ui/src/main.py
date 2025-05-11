@@ -168,4 +168,5 @@ if __name__ == '__main__':
         reload_includes=['*.py', '*.js'],
         timeout_graceful_shutdown=0,
         log_config=get_uvicorn_log_config(),
+        log_level='critical',
     )

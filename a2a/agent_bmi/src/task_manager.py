@@ -5,9 +5,9 @@ import traceback
 from collections.abc import AsyncIterable
 
 from agent_bmi.src.agent import BMIAgent
-from agent_bmi.src.common.server import utils
-from agent_bmi.src.common.server.task_manager import InMemoryTaskManager
-from agent_bmi.src.common.types import (
+from common.server import utils
+from common.server import InMemoryTaskManager
+from common.types import (
     Artifact,
     InternalError,
     InvalidParamsError,
@@ -27,7 +27,7 @@ from agent_bmi.src.common.types import (
     TaskStatusUpdateEvent,
     TextPart,
 )
-from agent_bmi.src.common.utils.push_notification_auth import PushNotificationSenderAuth
+from common.utils.push_notification_auth import PushNotificationSenderAuth
 
 
 logger = logging.getLogger(__name__)

@@ -5,7 +5,7 @@ import traceback
 
 from typing import Any
 
-from ui.src.common.types import Message, Part, Task
+from common.types import Message, Part, Task
 from ui.src.service.client.client import ConversationClient
 from ui.src.service.types import (
     Conversation,
@@ -21,7 +21,7 @@ from ui.src.service.types import (
     SendMessageRequest,
 )
 
-from .state import (
+from ui.src.state.state import (
     AppState,
     SessionTask,
     StateConversation,

@@ -2,8 +2,8 @@ import base64
 import json
 import uuid
 
-from ui.src.common.client import A2ACardResolver
-from ui.src.common.types import (
+from common.client import A2ACardResolver
+from common.types import (
     AgentCard,
     DataPart,
     Message,

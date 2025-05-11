@@ -3,14 +3,14 @@ import os
 
 from agent_websearch.src.agent import WebsearchAgent
 from agent_websearch.src.task_manager import AgentTaskManager
-from agent_websearch.src.common.server import A2AServer
-from agent_websearch.src.common.types import (
+from common.server import A2AServer
+from common.types import (
     AgentCapabilities,
     AgentCard,
     AgentSkill,
     MissingAPIKeyError,
 )
-from agent_websearch.src.common.utils.push_notification_auth import PushNotificationSenderAuth
+from common.utils.push_notification_auth import PushNotificationSenderAuth
 from pylogger import get_uvicorn_log_config, get_python_logger
 
 logger = get_python_logger()
