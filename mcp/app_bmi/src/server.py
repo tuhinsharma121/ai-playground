@@ -55,8 +55,8 @@ def invoke_bmi_agent(height: str, weight: str):
     This function predicts the BMI index based on the provided height and weight.
 
     Args:
-        height (int): The height in centimeters.
-        weight (int): The weight in kilograms.
+        height (float): The height in centimeters.
+        weight (float): The weight in kilograms.
 
     Returns:
         str: A string containing the predicted BMI index.
@@ -64,8 +64,8 @@ def invoke_bmi_agent(height: str, weight: str):
     logger.info("Invoking BMI Agent tool")
 
     try:
-        height = int(height)
-        weight = int(weight)
+        height = float(height)
+        weight = float(weight)
         X_test = pd.DataFrame({"height": [height], "weight": [weight]})
         prediction = model.predict(X_test)
         return str(prediction[0])
