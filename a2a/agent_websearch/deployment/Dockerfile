@@ -20,7 +20,7 @@ RUN pip3 install -r /requirements.txt
 # --------------------------------------------------------------------------------------------------
 
 COPY agent_websearch /agent_websearch
-COPY agent_websearch/src/main.py /main.py
+COPY agent_websearch/src/server.py /server.py
 COPY common /common
 COPY pylogger.py /pylogger.py
 

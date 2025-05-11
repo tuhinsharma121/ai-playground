@@ -78,8 +78,10 @@ def email_tool(email_id: str, subject: str, body: str) -> str:
     """
 
     logger.info("Invoking Email Agent tool")
+    logger.info(f"Email ID: {email_id}, Subject: {subject}, Body: {body}")
     response = invoke_email_agent(email_id=email_id, subject=subject, body=body)
     logger.info(f"Response: {response}")
+    logger.info("Email Agent tool invoked")
     return response
 
 
@@ -146,13 +148,13 @@ class EmailAgent:
                 yield {
                     'is_task_complete': False,
                     'require_user_input': False,
-                    'content': 'Performing BMI calculations...',
+                    'content': 'Sending Email...',
                 }
             elif isinstance(message, ToolMessage):
                 yield {
                     'is_task_complete': False,
                     'require_user_input': False,
-                    'content': 'Processing the BMI results...',
+                    'content': 'Sending Email...',
                 }
 
         yield self.get_agent_response(config)

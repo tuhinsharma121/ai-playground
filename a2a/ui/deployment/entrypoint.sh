@@ -11,4 +11,4 @@
 # start the gunicorn web server with uvicorn workers
 # --------------------------------------------------------------------------------------------------
 
-python /main.py
+python /app.py

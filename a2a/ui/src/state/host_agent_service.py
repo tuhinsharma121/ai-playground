@@ -31,7 +31,7 @@ from ui.src.state.state import (
 )
 
 
-server_url = 'http://localhost:12000'
+server_url = f'http://{os.getenv('A2A_SERVER_HOST', '0.0.0.0')}:{os.getenv('A2A_SERVER_PORT', '8501')}'
 
 
 async def ListConversations() -> list[Conversation]:

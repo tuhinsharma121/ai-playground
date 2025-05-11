@@ -15,10 +15,10 @@ services:
       - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - TAVILY_API_KEY=${TAVILY_API_KEY}
-      - PORT=10000
+      - PORT=1001
       - HOST=agent_websearch
     ports:
-      - "10000:10000"
+      - "1001:1001"
   agent_bmi:
     build:
       context: "."
@@ -35,10 +35,10 @@ services:
       - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - TAVILY_API_KEY=${TAVILY_API_KEY}
-      - PORT=10001
+      - PORT=2001
       - HOST=agent_bmi
     ports:
-      - "10001:10001"
+      - "2001:2001"
   agent_email:
     build:
       context: "."
@@ -57,10 +57,10 @@ services:
       - TAVILY_API_KEY=${TAVILY_API_KEY}
       - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - RESEND_API_KEY=${RESEND_API_KEY}
-      - PORT=10002
+      - PORT=3001
       - HOST=agent_email
     ports:
-      - "10002:10002"
+      - "3001:3001"
   ui:
     build:
       context: "."
@@ -76,8 +76,9 @@ services:
       - RESEND_API_KEY=${RESEND_API_KEY}
       - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - UI_PORT=12000
+      - A2A_SERVER_HOST=0.0.0.0
+      - A2A_UI_PORT=8501
     ports:
-      - "12000:12000"
+      - "8501:8501"
 networks:
   dataverse_ai_nw: { }

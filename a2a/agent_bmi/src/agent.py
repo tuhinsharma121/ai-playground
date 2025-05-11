@@ -112,8 +112,10 @@ def bmi_tool(height: str,weight: str) -> str:
     """
 
     logger.info("Invoking BMI Agent tool")
+    logger.info(f"Height: {height}, Weight: {weight}")
     response = invoke_bmi_agent(height, weight)
     logger.info(f"Response: {response}")
+    logger.info("Invoking BMI Agent tool completed")
     return response
 
 

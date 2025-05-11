@@ -1,17 +1,11 @@
-"""A UI solution and host service to interact with the agent framework.
-run:
-  uv main.py
-"""
-
-import os
-
 import mesop as me
-
-from ui.src.components.api_key_dialog import api_key_dialog
-from ui.src.components.page_scaffold import page_scaffold
-from dotenv import load_dotenv
+import os
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
+
+from pylogger import get_uvicorn_log_config
+from ui.src.components.api_key_dialog import api_key_dialog
+from ui.src.components.page_scaffold import page_scaffold
 from ui.src.pages.agent_list import agent_list_page
 from ui.src.pages.conversation import conversation_page
 from ui.src.pages.event_list import event_list_page
@@ -21,10 +15,6 @@ from ui.src.pages.task_list import task_list_page
 from ui.src.service.server.server import ConversationServer
 from ui.src.state import host_agent_service
 from ui.src.state.state import AppState
-from pylogger import get_uvicorn_log_config
-
-
-load_dotenv()
 
 
 def on_load(e: me.LoadEvent):  # pylint: disable=unused-argument
@@ -39,7 +29,7 @@ def on_load(e: me.LoadEvent):  # pylint: disable=unused-argument
     # check if the API key is set in the environment
     # and if the user is using Vertex AI
     uses_vertex_ai = (
-        os.getenv('GOOGLE_GENAI_USE_VERTEXAI', '').upper() == 'TRUE'
+            os.getenv('GOOGLE_GENAI_USE_VERTEXAI', '').upper() == 'TRUE'
     )
     api_key = os.getenv('GOOGLE_API_KEY', '')
 
@@ -154,14 +144,11 @@ if __name__ == '__main__':
     import uvicorn
 
     # Setup the connection details, these should be set in the environment
-    host = os.environ.get('A2A_UI_HOST', '0.0.0.0')
-    port = int(os.environ.get('A2A_UI_PORT', '12000'))
-
-    # Set the client to talk to the server
-    host_agent_service.server_url = f'http://{host}:{port}'
+    host = os.getenv('A2A_UI_HOST', '0.0.0.0')
+    port = int(os.getenv('A2A_UI_PORT', '8501'))
 
     uvicorn.run(
-        'main:app',
+        app='app:app',
         host=host,
         port=port,
         reload=True,

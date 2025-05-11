@@ -36,35 +36,6 @@ def invoke_websearch_agent(query):
         docs = web_search_tool.invoke({"query": query})
         result = [d["content"] for d in docs]
         return result
-        context = "\n".join([d["content"] for d in docs])
-
-        template = """
-        You are a helpful AI assistant. Use the following context to answer the user's question.
-
-        Context:
-        {context}
-
-        Question:
-        {question}
-
-        Answer in a concise and informative way.
-        """
-
-        prompt = PromptTemplate(
-            input_variables=["context", "question"],
-            template=template,
-        )
-
-        # Example usage
-        final_prompt = prompt.format(
-            context=context,
-            question=query
-        )
-
-        llm = OpenAI(model="gpt-4o-mini")
-        response = llm.complete(final_prompt)
-        logger.info(f"Response: {response.text}")
-        return response.text
 
     except Exception as e:
         logger.error(f"An error occurred while while invoking TavilySearchResults. Logs: {str(e)}")
@@ -97,8 +68,10 @@ def websearch_tool(query: str) -> str:
     """
 
     logger.info("Invoking WebSearch Agent tool")
+    logger.info(f"Query: {query}")
     response = invoke_websearch_agent(query)
     logger.info(f"Response: {response}")
+    logger.info("WebSearch Agent tool invoked")
     return response
 
 
