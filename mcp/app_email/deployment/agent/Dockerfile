@@ -1,13 +1,5 @@
 FROM docker.io/library/python:3.11.12
-LABEL maintainer="Tuhin Sharma <tuhsharm@redhat.com>"
-
-# --------------------------------------------------------------------------------------------------
-# configure Red Hat IT CA certs
-# --------------------------------------------------------------------------------------------------
-
-RUN pip3 install --disable-pip-version-check --no-cache-dir poetry==1.5.1
-RUN curl --create-dirs -O --output-dir ~/.rh_certs https://certs.corp.redhat.com/certs/Current-IT-Root-CAs.pem
-RUN poetry config certificates.de-cop-nexus.cert ~/.rh_certs/Current-IT-Root-CAs.pem
+LABEL maintainer="Tuhin Sharma <tuhinsharma121@gmail.com>"
 
 # --------------------------------------------------------------------------------------------------
 # set the working directory to /
