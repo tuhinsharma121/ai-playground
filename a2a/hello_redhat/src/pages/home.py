@@ -86,7 +86,7 @@ def home_page_content(app_state: AppState):
                         style=me.Style(
                             margin=me.Margin(top=16),
                             color=me.theme_var('on-surface-variant'),
-                            font_size='22px',
+                            font_size='40px',
                             text_align='center',
                             font_weight='700',
                         ),
