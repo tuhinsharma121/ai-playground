@@ -34,7 +34,7 @@ def main():
         )
 
         host = os.getenv("HOST", "0.0.0.0")
-        port = int(os.getenv("PORT", 10002))
+        port = int(os.getenv("PORT", 3001))
         agent_card = AgentCard(
             name='Email Agent',
             description="""

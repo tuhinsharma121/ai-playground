@@ -34,7 +34,7 @@ def main():
         )
 
         host = os.getenv("HOST", "0.0.0.0")
-        port = int(os.getenv("PORT", 10000))
+        port = int(os.getenv("PORT", 1001))
         agent_card = AgentCard(
             name='Websearch Agent',
             description=\

@@ -10,9 +10,6 @@ services:
     networks:
       - dataverse_ai_nw
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - RESEND_API_KEY=${RESEND_API_KEY}
-      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - TAVILY_API_KEY=${TAVILY_API_KEY}
       - PORT=1001
@@ -30,11 +27,7 @@ services:
     networks:
       - dataverse_ai_nw
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - RESEND_API_KEY=${RESEND_API_KEY}
-      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - TAVILY_API_KEY=${TAVILY_API_KEY}
       - PORT=2001
       - HOST=agent_bmi
     ports:
@@ -50,31 +43,24 @@ services:
     networks:
       - dataverse_ai_nw
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RESEND_API_KEY=${RESEND_API_KEY}
       - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - TAVILY_API_KEY=${TAVILY_API_KEY}
-      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
-      - RESEND_API_KEY=${RESEND_API_KEY}
       - PORT=3001
       - HOST=agent_email
     ports:
       - "3001:3001"
-  ui:
+  hello_redhat:
     build:
       context: "."
-      dockerfile: ui/deployment/Dockerfile
-    image: ui:latest
-    container_name: "ui"
+      dockerfile: hello_redhat/deployment/Dockerfile
+    image: hello_redhat:latest
+    container_name: "hello_redhat"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - RESEND_API_KEY=${RESEND_API_KEY}
-      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - A2A_SERVER_HOST=0.0.0.0
       - A2A_UI_PORT=8501

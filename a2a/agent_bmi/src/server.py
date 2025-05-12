@@ -33,7 +33,7 @@ def main():
         )
 
         host = os.getenv("HOST", "0.0.0.0")
-        port = int(os.getenv("PORT", 10001))
+        port = int(os.getenv("PORT", 2001))
         agent_card = AgentCard(
             name='BMI Agent',
             description= \
