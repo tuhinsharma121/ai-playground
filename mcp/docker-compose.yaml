@@ -95,12 +95,12 @@ services:
       - PORT=5002
     ports:
       - "5002:5002"
-  agent_cowboy:
+  hello_redhat:
     build:
       context: "."
-      dockerfile: agent_cowboy/deployment/agent/Dockerfile
-    image: agent_cowboy:latest
-    container_name: "agent_cowboy"
+      dockerfile: hello_redhat/deployment/agent/Dockerfile
+    image: hello_redhat:latest
+    container_name: "hello_redhat"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
@@ -118,20 +118,22 @@ services:
       - PORT=8000
     ports:
       - "8000:8000"
-  ui_cowboy:
+  hello_redhat_ui:
     build:
       context: "."
-      dockerfile: agent_cowboy/deployment/ui/Dockerfile
-    image: ui_cowboy:latest
-    container_name: "ui_cowboy"
+      dockerfile: hello_redhat/deployment/ui/Dockerfile
+    image: hello_redhat_ui:latest
+    container_name: "hello_redhat_ui"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
     environment:
-      - AGENT_HOST=agent_cowboy
+      - AGENT_HOST=hello_redhat
       - AGENT_PORT=8000
       - PORT=8501
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
     ports:
       - "8501:8501"
 networks:

@@ -30,13 +30,8 @@ The system follows a modular architecture where:
 - Results are processed and formatted before being returned to the user
 
 ### Scalable Agent Development
-One of the key strengths of this architecture is its scalability and modularity. The transition from Hey Fedora to Hey Cowboy perfectly demonstrates this:
+One of the key strengths of this architecture is its scalability and modularity.
 
-### Building New Agents is Simple and Incremental
-- Hey Fedora started with 2 tools (WebSearch and Email)
-- Hey Cowboy was easily created by adding just 1 more tool (BMI App)
-- The same base configuration and architecture were reused 
-- No changes were needed to existing tools when adding new ones
 
 ### Scalability Benefits
 
@@ -45,36 +40,10 @@ One of the key strengths of this architecture is its scalability and modularity.
 - Reusable Components: Common tools (like WebSearch and Email) are shared across agents 
 - Easy Deployment: New agents use the same Docker infrastructure, just with different tool sets
 
-## Agent 1: Hey Fedora
 
-`Hey Fedora` is a Prototype of an Agent. It has access to 2 GenAI applications which are exposed as tools via MCP (Model Context Protocol)
+## Agent: Hello Red Hat
 
-### Tool
-Following are the applications exposed via MCP as Tools.
-1. **WebSearch App**
-    - Use this for any question related to *WebSearch* — The retrieved results from the web is formatted and cleaned by an LLM before returning the result.
-
-2. **Email App**
-    - Use this tool **only if the user explicitly requests to send an email**. An LLM is used to reformat the email body with proper HTML tags.
-
-
-### Flow Diagram
-
-![hey-fedora.jpg](hey-fedora.jpg)
-
-### RUN
-1. docker compose -f docker-compose-fedora.yaml build
-2. docker compose -f docker-compose-fedora.yaml up -d
-3. docker compose -f docker-compose-fedora.yaml logs -f
-4. go to http://localhost:8501
-5. Try to ask a question like
-   - Q - "Send me the current BMI report via email of the lead actor/actress in the Netflix movie Kumari"
-   - A - "I do not have the ability to directly access a BMI report. However, I can search for the lead actor/actress in the Netflix movie Kumari and then send you an email requesting their BMI report. Would you like me to proceed with this approach?"
-7. docker compose -f docker-compose-fedora.yaml down
-
-## Agent 2: Hey Cowboy
-
-`Hey Cowboy`  has access to 2 + 1 GenAI applications which are exposed as tools via MCP (Model Context Protocol)
+`Hello Red Hat`  has access to 3 GenAI applications which are exposed as tools via MCP (Model Context Protocol)
 
 ### Tool
 Following are the applications exposed via MCP as Tools.
@@ -89,12 +58,12 @@ Following are the applications exposed via MCP as Tools.
 
 ### Flow Diagram
 
-![hey-cowboy.jpg](hey-cowboy.jpg)
+![hello-redhat.jpg](hello-redhat.jpg)
 
 ### RUN
-1. docker compose -f docker-compose-cowboy.yaml build
-2. docker compose -f docker-compose-cowboy.yaml up -d
-3. docker compose -f docker-compose-cowboy.yaml logs -f
+1. docker compose build
+2. docker compose up -d
+3. docker compose logs -f
 4. go to http://localhost:8501
 5. Try to ask a question like
    - Q - "Send me the current BMI report via email of the lead actor/actress in the Netflix movie Kumari"
@@ -105,5 +74,5 @@ Following are the applications exposed via MCP as Tools.
       **Observation:** The email has been sent successfully.
 
       **Final Answer:** I have sent an email to Tuhin with the subject "BMI report of Aishwarya Lekshmi" and the body "Dear Tuhin,\n\nThe BMI of Aishwarya Lekshmi is 21.94, which falls within the normal weight range.\n\nRegards,\nFedora"."
-6. docker compose -f docker-compose-cowboy.yaml down
+6. docker compose down
 

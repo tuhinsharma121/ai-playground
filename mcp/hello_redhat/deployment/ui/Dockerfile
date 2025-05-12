@@ -12,21 +12,21 @@ WORKDIR /
 # install python packages
 # --------------------------------------------------------------------------------------------------
 
-COPY agent_cowboy/deployment/ui/requirements.txt /requirements.txt
+COPY hello_redhat/deployment/ui/requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
 
 # --------------------------------------------------------------------------------------------------
 # copy src code and files into dir /root
 # --------------------------------------------------------------------------------------------------
 
-COPY agent_cowboy /agent_cowboy
-COPY agent_cowboy/src/app.py /app.py
+COPY hello_redhat /hello_redhat
+COPY hello_redhat/src/app.py /app.py
 COPY pylogger.py /pylogger.py
 
 # --------------------------------------------------------------------------------------------------
 # add entrypoint for the container
 # --------------------------------------------------------------------------------------------------
 
-ADD agent_cowboy/deployment/ui/entrypoint.sh /bin/entrypoint.sh
+ADD hello_redhat/deployment/ui/entrypoint.sh /bin/entrypoint.sh
 RUN chmod +x /bin/entrypoint.sh
 ENTRYPOINT ["/bin/entrypoint.sh"]
