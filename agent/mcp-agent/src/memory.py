@@ -6,12 +6,12 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.store.memory import InMemoryStore
 
-SQLITE_DB_PATH: str = "checkpoints.db"
+from constants import constants
 
 
 def get_sqlite_saver() -> AbstractAsyncContextManager[AsyncSqliteSaver]:
     """Initialize and return a SQLite saver instance."""
-    return AsyncSqliteSaver.from_conn_string(SQLITE_DB_PATH)
+    return AsyncSqliteSaver.from_conn_string(constants.SQLITE_DB_PATH)
 
 
 class AsyncInMemoryStore:
