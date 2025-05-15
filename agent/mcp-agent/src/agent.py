@@ -7,9 +7,7 @@ from datetime import datetime
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
-from langgraph.store.memory import InMemoryStore
 
 from constants import constants
 from pylogger import get_python_logger
@@ -20,36 +18,85 @@ logger = get_python_logger(log_level=constants.LOG_LEVEL)
 model = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.5, streaming=True)
 
 current_date = datetime.now().strftime("%B %d, %Y")
+
 instructions = f"""
-    You are a helpful research assistant with the ability to search the web and use other tools.
+    You are a helpful research assistant with the ability to use other tools. 
+    Your name is Red Hat and you are extremely intelligent.
+    
     Today's date is {current_date}.
 
     A few things to remember:
     - Please include markdown-formatted links to any citations used in your response. Only include one
     or two citations per response unless more are needed. ONLY USE LINKS RETURNED BY THE TOOLS.
-    - Use calculator tool with numexpr to answer math questions. The user does not understand numexpr,
-      so for the final response, use human readable format - e.g. "300 * 200", not "(300 \\times 200)".
+    - Only use the tools you are given to answer the users question. Do not answer directly from internal knowledge.
+    - You must always reason before acting.
+    - Every Final Answer must be grounded in tool observations.
+    - always make sure your answer is *FORMATTED WELL*
+    - Show how you are thinking and reasoning step-by-step and then respond with Final answer.
     """
+
+# instructions = f"""
+# You areToday's date is {current_date}.
+# You reason step-by-step to understand the user’s query, choose the correct tool, and use tool outputs to form your response. You always follow the pattern:
+# **Thought → Action → Observation → (repeat if needed) → Final Answer**.
+#
+# You have access to the following tools:
+#
+# 1. **Email Agent Tool**
+#    - Use this tool **only if the user explicitly requests to send an email**.
+#    - If the name of the recipient is not mentioned then send the email to Tuhin.
+#    - Remember your name and signature are "Fedora" when you send an email.
+#    - This tool requires an email subject and an email body.
+#    - You must use information from the other tools to help compose the message.
+#
+# 2. **BMI Agent Tool**
+#    - Use this tool the user asks about calculating BMI.
+#    - This tool requires a height in cms and weight in kgs for a person. If not provided use other tools to infer it.
+#    - You can use information from the other tools if height and weight are not provided.
+#
+# 3. **Websearch Tool**
+#    - Use this when the user question cannot be answered by the Christmas or Medium or BMI tools.
+#    - Only call this when the topic is outside the coverage of the other three tools.
+#
+# ### 🔐 Rules:
+# - DO NOT answer directly from internal knowledge.
+# - You must always reason before acting.
+# - Every Final Answer must be grounded in tool observations.
+# - If tool output is insufficient, continue the loop with another Thought → Action or ask the user for more information.
+# - Only send emails when clearly instructed by the user.
+# - Please include markdown-formatted links to any citations used in your response.
+# Only include one or two citations per response unless more are needed.
+# always make sure your answer is *FORMATTED WELL*
+#
+# Show how you are thinking and reasoning step-by-step and then respond with Final answer.
+#
+# """
 
 
 @asynccontextmanager
 async def get_research_assistant():
-    mcp_calculator_host = os.getenv("fhskdjhfksdhf", "0.0.0.0")
-    mcp_websearch_host = os.getenv("mcp_websearch_host", "0.0.0.0")
+    mcp_bmi_host = os.getenv("MCP_BMI_HOST", "0.0.0.0")
+    mcp_email_host = os.getenv("MCP_EMAIL_HOST", "0.0.0.0")
+    mcp_websearch_host = os.getenv("MCP_WEBSEARCH_HOST", "0.0.0.0")
 
-    mcp_calculator_port = os.getenv("MCP_BMI_PORT", "8080")
-    mcp_websearch_port = os.getenv("MCP_WEBSEARCH_PORT", "8081")
+    mcp_bmi_port = os.getenv("MCP_BMI_PORT", "1002")
+    mcp_email_port = os.getenv("MCP_EMAIL_PORT", "2002")
+    mcp_websearch_port = os.getenv("MCP_WEBSEARCH_PORT", "3002")
 
     async with MultiServerMCPClient(
             {
-                "calculator_agent_tool": {
-                    "url": f"http://{mcp_calculator_host}:{mcp_calculator_port}/sse",
+                "bmi_agent_tool": {
+                    "url": f"http://{mcp_bmi_host}:{mcp_bmi_port}/sse",
                     "transport": "sse"
                 },
                 "websearch_agent_tool": {
                     "url": f"http://{mcp_websearch_host}:{mcp_websearch_port}/sse",
                     "transport": "sse"
                 },
+                "email_agent_tool": {
+                    "url": f"http://{mcp_email_host}:{mcp_email_port}/sse",
+                    "transport": "sse"
+                }
             }
     ) as client, initialize_database() as saver, initialize_store() as store:
         agent = create_react_agent(
@@ -60,7 +107,6 @@ async def get_research_assistant():
             checkpointer=saver
         )
         yield agent
-
 
 
 async def main():

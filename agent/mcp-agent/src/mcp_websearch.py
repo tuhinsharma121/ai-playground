@@ -99,7 +99,7 @@ async def web_search(query: str, max_results: int = 5) -> str:
 
 if __name__ == "__main__":
     logger.info("Starting Tavily Search MCP server")
-    port = int(os.getenv("SEARCH_PORT", "8081"))
+    port = int(os.getenv("SEARCH_PORT", "3002"))
     mcp.settings.port = port
     mcp.settings.host = "0.0.0.0"
     mcp.run(transport="sse")
