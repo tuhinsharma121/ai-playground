@@ -9,3 +9,4 @@ data*
 results*
 .idea/
 Untitled.ipynb
+__pycache__
