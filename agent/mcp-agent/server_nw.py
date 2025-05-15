@@ -14,9 +14,10 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.pregel import Pregel
 from langgraph.types import Command, Interrupt, StreamMode
 from langsmith import Client as LangsmithClient
-from src.agent import research_assistant
+
 from constants import constants
 from pylogger import get_python_logger
+from src.agent import get_research_assistant
 from src.memory import initialize_database, initialize_store
 from src.schema import (
     ChatHistory,
@@ -26,8 +27,7 @@ from src.schema import (
     FeedbackResponse,
     ServiceMetadata,
     StreamInput,
-    UserInput, AllModelEnum,
-)
+    UserInput, )
 from src.utils import (
     convert_message_content_to_string,
     langchain_to_chat_message,
@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     try:
         # Initialize both checkpointer (for short-term memory) and store (for long-term memory)
-        async with initialize_database() as saver, initialize_store() as store:
+        async with initialize_database() as saver, initialize_store() as store, get_research_assistant() as agent:
             # Set up both components
             if hasattr(saver, "setup"):  # ignore: union-attr
                 await saver.setup()
@@ -70,7 +70,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                 await store.setup()
 
             # Configure agents with both memory components
-            agent = research_assistant
             # Set checkpointer for thread-scoped memory (conversation history)
             agent.checkpointer = saver
             # Set store for long-term memory (cross-conversation knowledge)
@@ -162,29 +161,29 @@ async def invoke(user_input: UserInput, agent_id: str) -> ChatMessage:
     # in interrupt-agent, or a tool step in research-assistant), it's omitted. Arguably,
     # you'd want to include it. You could update the API to return a list of ChatMessages
     # in that case.
-    agent: Pregel = research_assistant
-    kwargs, run_id = await _handle_input(user_input, agent)
-    try:
-        response_events: list[tuple[str, Any]] = await agent.ainvoke(**kwargs, stream_mode=StreamMode(["updates",
-                                                                                            "values"]))  # type: ignore # fmt: skip
-        response_type, response = response_events[-1]
-        if response_type == "values":
-            # Normal response, the agent completed successfully
-            output = langchain_to_chat_message(response["messages"][-1])
-        elif response_type == "updates" and "__interrupt__" in response:
-            # The last thing to occur was an interrupt
-            # Return the value of the first interrupt as an AIMessage
-            output = langchain_to_chat_message(
-                AIMessage(content=response["__interrupt__"][0].value)
-            )
-        else:
-            raise ValueError(f"Unexpected response type: {response_type}")
+    async with get_research_assistant() as agent:
+        kwargs, run_id = await _handle_input(user_input, agent)
+        try:
+            response_events: list[tuple[str, Any]] = await agent.ainvoke(**kwargs, stream_mode=StreamMode(["updates",
+                                                                                                           "values"]))  # type: ignore # fmt: skip
+            response_type, response = response_events[-1]
+            if response_type == "values":
+                # Normal response, the agent completed successfully
+                output = langchain_to_chat_message(response["messages"][-1])
+            elif response_type == "updates" and "__interrupt__" in response:
+                # The last thing to occur was an interrupt
+                # Return the value of the first interrupt as an AIMessage
+                output = langchain_to_chat_message(
+                    AIMessage(content=response["__interrupt__"][0].value)
+                )
+            else:
+                raise ValueError(f"Unexpected response type: {response_type}")
 
-        output.run_id = str(run_id)
-        return output
-    except Exception as e:
-        logger.error(f"An exception occurred: {e}")
-        raise HTTPException(status_code=500, detail="Unexpected error")
+            output.run_id = str(run_id)
+            return output
+        except Exception as e:
+            logger.error(f"An exception occurred: {e}")
+            raise HTTPException(status_code=500, detail="Unexpected error")
 
 
 async def message_generator(
@@ -195,106 +194,107 @@ async def message_generator(
 
     This is the workhorse method for the /stream endpoint.
     """
-    agent: Pregel = research_assistant
-    kwargs, run_id = await _handle_input(user_input, agent)
+    async with get_research_assistant() as agent:
+        # agent: Pregel = get_research_assistant()
+        kwargs, run_id = await _handle_input(user_input, agent)
 
-    try:
-        # Process streamed events from the graph and yield messages over the SSE stream.
-        async for stream_event in agent.astream(
-                **kwargs, stream_mode=["updates", "messages", "custom"]
-        ):
-            if not isinstance(stream_event, tuple):
-                continue
-            stream_mode, event = stream_event
-            new_messages = []
-            if stream_mode == "updates":
-                for node, updates in event.items():
-                    # A simple approach to handle agent interrupts.
-                    # In a more sophisticated implementation, we could add
-                    # some structured ChatMessage type to return the interrupt value.
-                    if node == "__interrupt__":
-                        interrupt: Interrupt
-                        for interrupt in updates:
-                            new_messages.append(AIMessage(content=interrupt.value))
+        try:
+            # Process streamed events from the graph and yield messages over the SSE stream.
+            async for stream_event in agent.astream(
+                    **kwargs, stream_mode=["updates", "messages", "custom"]
+            ):
+                if not isinstance(stream_event, tuple):
+                    continue
+                stream_mode, event = stream_event
+                new_messages = []
+                if stream_mode == "updates":
+                    for node, updates in event.items():
+                        # A simple approach to handle agent interrupts.
+                        # In a more sophisticated implementation, we could add
+                        # some structured ChatMessage type to return the interrupt value.
+                        if node == "__interrupt__":
+                            interrupt: Interrupt
+                            for interrupt in updates:
+                                new_messages.append(AIMessage(content=interrupt.value))
+                            continue
+                        updates = updates or {}
+                        update_messages = updates.get("messages", [])
+                        # special cases for using langgraph-supervisor library
+                        if node == "supervisor":
+                            # Get only the last AIMessage since supervisor includes all previous messages
+                            ai_messages = [msg for msg in update_messages if isinstance(msg, AIMessage)]
+                            if ai_messages:
+                                update_messages = [ai_messages[-1]]
+                        if node in ("research_expert", "math_expert"):
+                            # By default the sub-agent output is returned as an AIMessage.
+                            # Convert it to a ToolMessage so it displays in the UI as a tool response.
+                            msg = ToolMessage(
+                                content=update_messages[0].content,
+                                name=node,
+                                tool_call_id="",
+                            )
+                            update_messages = [msg]
+                        new_messages.extend(update_messages)
+
+                if stream_mode == "custom":
+                    new_messages = [event]
+
+                # LangGraph streaming may emit tuples: (field_name, field_value)
+                # e.g. ('content', <str>), ('tool_calls', [ToolCall,...]), ('additional_kwargs', {...}), etc.
+                # We accumulate only supported fields into `parts` and skip unsupported metadata.
+                # More info at: https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_messages/
+                processed_messages = []
+                current_message: dict[str, Any] = {}
+                for message in new_messages:
+                    if isinstance(message, tuple):
+                        key, value = message
+                        # Store parts in temporary dict
+                        current_message[key] = value
+                    else:
+                        # Add complete message if we have one in progress
+                        if current_message:
+                            processed_messages.append(_create_ai_message(current_message))
+                            current_message = {}
+                        processed_messages.append(message)
+
+                # Add any remaining message parts
+                if current_message:
+                    processed_messages.append(_create_ai_message(current_message))
+
+                for message in processed_messages:
+                    try:
+                        chat_message = langchain_to_chat_message(message)
+                        chat_message.run_id = str(run_id)
+                    except Exception as e:
+                        logger.error(f"Error parsing message: {e}")
+                        yield f"data: {json.dumps({'type': 'error', 'content': 'Unexpected error'})}\n\n"
                         continue
-                    updates = updates or {}
-                    update_messages = updates.get("messages", [])
-                    # special cases for using langgraph-supervisor library
-                    if node == "supervisor":
-                        # Get only the last AIMessage since supervisor includes all previous messages
-                        ai_messages = [msg for msg in update_messages if isinstance(msg, AIMessage)]
-                        if ai_messages:
-                            update_messages = [ai_messages[-1]]
-                    if node in ("research_expert", "math_expert"):
-                        # By default the sub-agent output is returned as an AIMessage.
-                        # Convert it to a ToolMessage so it displays in the UI as a tool response.
-                        msg = ToolMessage(
-                            content=update_messages[0].content,
-                            name=node,
-                            tool_call_id="",
-                        )
-                        update_messages = [msg]
-                    new_messages.extend(update_messages)
+                    # LangGraph re-sends the input message, which feels weird, so drop it
+                    if chat_message.type == "human" and chat_message.content == user_input.message:
+                        continue
+                    yield f"data: {json.dumps({'type': 'message', 'content': chat_message.model_dump()})}\n\n"
 
-            if stream_mode == "custom":
-                new_messages = [event]
-
-            # LangGraph streaming may emit tuples: (field_name, field_value)
-            # e.g. ('content', <str>), ('tool_calls', [ToolCall,...]), ('additional_kwargs', {...}), etc.
-            # We accumulate only supported fields into `parts` and skip unsupported metadata.
-            # More info at: https://langchain-ai.github.io/langgraph/cloud/how-tos/stream_messages/
-            processed_messages = []
-            current_message: dict[str, Any] = {}
-            for message in new_messages:
-                if isinstance(message, tuple):
-                    key, value = message
-                    # Store parts in temporary dict
-                    current_message[key] = value
-                else:
-                    # Add complete message if we have one in progress
-                    if current_message:
-                        processed_messages.append(_create_ai_message(current_message))
-                        current_message = {}
-                    processed_messages.append(message)
-
-            # Add any remaining message parts
-            if current_message:
-                processed_messages.append(_create_ai_message(current_message))
-
-            for message in processed_messages:
-                try:
-                    chat_message = langchain_to_chat_message(message)
-                    chat_message.run_id = str(run_id)
-                except Exception as e:
-                    logger.error(f"Error parsing message: {e}")
-                    yield f"data: {json.dumps({'type': 'error', 'content': 'Unexpected error'})}\n\n"
-                    continue
-                # LangGraph re-sends the input message, which feels weird, so drop it
-                if chat_message.type == "human" and chat_message.content == user_input.message:
-                    continue
-                yield f"data: {json.dumps({'type': 'message', 'content': chat_message.model_dump()})}\n\n"
-
-            if stream_mode == "messages":
-                if not user_input.stream_tokens:
-                    continue
-                msg, metadata = event
-                if "skip_stream" in metadata.get("tags", []):
-                    continue
-                # For some reason, astream("messages") causes non-LLM nodes to send extra messages.
-                # Drop them.
-                if not isinstance(msg, AIMessageChunk):
-                    continue
-                content = remove_tool_calls(msg.content)
-                if content:
-                    # Empty content in the context of OpenAI usually means
-                    # that the model is asking for a tool to be invoked.
-                    # So we only print non-empty content.
-                    yield f"data: {json.dumps({'type': 'token', 'content': convert_message_content_to_string(content)})}\n\n"
-    except Exception as e:
-        logger.error(f"Error in message generator: {e}")
-        yield f"data: {json.dumps({'type': 'error', 'content': 'Internal server error'})}\n\n"
-    finally:
-        yield "data: [DONE]\n\n"
+                if stream_mode == "messages":
+                    if not user_input.stream_tokens:
+                        continue
+                    msg, metadata = event
+                    if "skip_stream" in metadata.get("tags", []):
+                        continue
+                    # For some reason, astream("messages") causes non-LLM nodes to send extra messages.
+                    # Drop them.
+                    if not isinstance(msg, AIMessageChunk):
+                        continue
+                    content = remove_tool_calls(msg.content)
+                    if content:
+                        # Empty content in the context of OpenAI usually means
+                        # that the model is asking for a tool to be invoked.
+                        # So we only print non-empty content.
+                        yield f"data: {json.dumps({'type': 'token', 'content': convert_message_content_to_string(content)})}\n\n"
+        except Exception as e:
+            logger.error(f"Error in message generator: {e}")
+            yield f"data: {json.dumps({'type': 'error', 'content': 'Internal server error'})}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
 
 
 def _create_ai_message(parts: dict) -> AIMessage:
@@ -362,22 +362,23 @@ async def feedback(feedback: Feedback) -> FeedbackResponse:
 
 
 @router.post("/history")
-def history(input: ChatHistoryInput) -> ChatHistory:
+async def history(input: ChatHistoryInput) -> ChatHistory:
     """
     Get chat history.
     """
     # TODO: Hard-coding DEFAULT_AGENT here is wonky
-    agent: Pregel = research_assistant
-    try:
-        state_snapshot = agent.get_state(
-            config=RunnableConfig(configurable={"thread_id": input.thread_id})
-        )
-        messages: list[AnyMessage] = state_snapshot.values["messages"]
-        chat_messages: list[ChatMessage] = [langchain_to_chat_message(m) for m in messages]
-        return ChatHistory(messages=chat_messages)
-    except Exception as e:
-        logger.error(f"An exception occurred: {e}")
-        raise HTTPException(status_code=500, detail="Unexpected error")
+    async with get_research_assistant() as agent:
+        agent: Pregel = agent
+        try:
+            state_snapshot = agent.get_state(
+                config=RunnableConfig(configurable={"thread_id": input.thread_id})
+            )
+            messages: list[AnyMessage] = state_snapshot.values["messages"]
+            chat_messages: list[ChatMessage] = [langchain_to_chat_message(m) for m in messages]
+            return ChatHistory(messages=chat_messages)
+        except Exception as e:
+            logger.error(f"An exception occurred: {e}")
+            raise HTTPException(status_code=500, detail="Unexpected error")
 
 
 @app.get("/health")
