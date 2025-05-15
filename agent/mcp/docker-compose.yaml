@@ -1,0 +1,140 @@
+services:
+  app_bmi:
+    build:
+      context: "."
+      dockerfile: app_bmi/deployment/agent/Dockerfile
+    image: app_bmi:latest
+    container_name: "app_bmi"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PORT=1001
+    ports:
+      - "1001:1001"
+  mcp_tool_bmi:
+    build:
+      context: "."
+      dockerfile: app_bmi/deployment/mcp/Dockerfile
+    image: mcp_tool_bmi:latest
+    container_name: "mcp_tool_bmi"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - AGENT_HOST=app_bmi
+      - AGENT_PORT=1001
+      - PORT=1002
+    ports:
+      - "1002:1002"
+  app_email:
+    build:
+      context: "."
+      dockerfile: app_email/deployment/agent/Dockerfile
+    image: app_email:latest
+    container_name: "app_email"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
+      - PORT=3001
+    ports:
+      - "3001:3001"
+  mcp_tool_email:
+    build:
+      context: "."
+      dockerfile: app_email/deployment/mcp/Dockerfile
+    image: mcp_tool_email:latest
+    container_name: "mcp_tool_email"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - AGENT_HOST=app_email
+      - AGENT_PORT=3001
+      - PORT=3002
+    ports:
+      - "3002:3002"
+  app_websearch:
+    build:
+      context: "."
+      dockerfile: app_websearch/deployment/agent/Dockerfile
+    image: app_websearch:latest
+    container_name: "app_websearch"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - PORT=5001
+    ports:
+      - "5001:5001"
+  mcp_tool_websearch:
+    build:
+      context: "."
+      dockerfile: app_websearch/deployment/mcp/Dockerfile
+    image: mcp_tool_websearch:latest
+    container_name: "mcp_tool_websearch"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - AGENT_HOST=app_websearch
+      - AGENT_PORT=5001
+      - PORT=5002
+    ports:
+      - "5002:5002"
+  hello_redhat:
+    build:
+      context: "."
+      dockerfile: hello_redhat/deployment/agent/Dockerfile
+    image: hello_redhat:latest
+    container_name: "hello_redhat"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MCP_WEBSEARCH_HOST=mcp_tool_websearch
+      - MCP_EMAIL_HOST=mcp_tool_email
+      - MCP_BMI_HOST=mcp_tool_bmi
+      - MCP_BMI_PORT=1002
+      - MCP_EMAIL_PORT=3002
+      - MCP_WEBSEARCH_PORT=5002
+      - PORT=8000
+    ports:
+      - "8000:8000"
+  hello_redhat_ui:
+    build:
+      context: "."
+      dockerfile: hello_redhat/deployment/ui/Dockerfile
+    image: hello_redhat_ui:latest
+    container_name: "hello_redhat_ui"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - AGENT_HOST=hello_redhat
+      - AGENT_PORT=8000
+      - PORT=8501
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
+    ports:
+      - "8501:8501"
+networks:
+  dataverse_ai_nw: { }
