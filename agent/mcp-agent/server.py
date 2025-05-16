@@ -19,7 +19,7 @@ from langsmith import Client as LangsmithClient
 
 from constants import constants
 from pylogger import get_python_logger
-from src.agent import get_research_assistant
+from src.agent import get_agent_redhat
 from src.schema import (
     ChatHistory,
     ChatHistoryInput,
@@ -62,7 +62,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     try:
 
-        async with get_research_assistant() as agent:
+        async with get_agent_redhat() as agent:
             yield
     except Exception as e:
         logger.error(f"Error during database/store initialization: {e}")
@@ -126,7 +126,7 @@ async def message_generator(
 
     This is the workhorse method for the /stream endpoint.
     """
-    async with get_research_assistant() as agent:
+    async with get_agent_redhat() as agent:
         # agent: Pregel = get_research_assistant()
         kwargs, run_id = await _handle_input(user_input, agent)
 
@@ -299,7 +299,7 @@ async def history(input: ChatHistoryInput) -> ChatHistory:
     Get chat history.
     """
     # TODO: Hard-coding DEFAULT_AGENT here is wonky
-    async with get_research_assistant() as agent:
+    async with get_agent_redhat() as agent:
         try:
             state_snapshot = await agent.aget_state(
                 config=RunnableConfig(configurable={"thread_id": input.thread_id})
