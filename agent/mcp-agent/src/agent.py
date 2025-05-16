@@ -99,6 +99,12 @@ async def get_research_assistant():
                 }
             }
     ) as client, initialize_database() as saver, initialize_store() as store:
+        # Set up both components
+        if hasattr(saver, "setup"):  # ignore: union-attr
+            await saver.setup()
+        # Only setup store for Postgres as InMemoryStore doesn't need setup
+        if hasattr(store, "setup"):  # ignore: union-attr
+            await store.setup()
         agent = create_react_agent(
             model=model,
             tools=client.get_tools(),
