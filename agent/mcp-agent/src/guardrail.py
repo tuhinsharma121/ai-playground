@@ -32,7 +32,7 @@ unsafe_content_categories = {
     "S4": "Child Exploitation.",
     "S5": "Defamation.",
     "S6": "Specialized Advice.",
-    "S7": "Privacy.",
+    # "S7": "Privacy.",
     "S8": "Intellectual Property.",
     "S9": "Indiscriminate Weapons.",
     "S10": "Hate.",
