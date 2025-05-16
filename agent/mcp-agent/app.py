@@ -1,16 +1,12 @@
 import asyncio
-import os
 import uuid
 from collections.abc import AsyncGenerator
 
 import streamlit as st
-from dotenv import load_dotenv
-from pydantic import ValidationError
 
+from pylogger import get_python_logger
 from src.client import AgentClient, AgentClientError
 from src.schema import ChatHistory, ChatMessage
-from src.schema import TaskData, TaskDataStatus
-from pylogger import get_python_logger
 
 logger = get_python_logger()
 # A Streamlit app for interacting with the langgraph agent via a simple chat interface.
@@ -81,17 +77,11 @@ async def main() -> None:
     user_id = get_or_create_user_id()
 
     if "agent_client" not in st.session_state:
-        load_dotenv()
-        agent_url = os.getenv("AGENT_URL")
-        if not agent_url:
-            host = os.getenv("HOST", "0.0.0.0")
-            port = os.getenv("PORT", 8000)
-            agent_url = f"http://{host}:{port}"
         try:
             with st.spinner("Connecting to agent service..."):
-                st.session_state.agent_client = AgentClient(base_url=agent_url)
+                st.session_state.agent_client = AgentClient()
         except AgentClientError as e:
-            st.error(f"Error connecting to agent service at {agent_url}: {e}")
+            st.error(f"Error connecting to agent service : {e}")
             st.markdown("The service might be booting up. Try again in a few seconds.")
             st.stop()
     agent_client: AgentClient = st.session_state.agent_client
@@ -127,13 +117,6 @@ async def main() -> None:
         agent_client.agent = "research-assistant"
         use_streaming = True
 
-        # with st.popover(":material/settings: Settings", use_container_width=True):
-        #     agent_client.agent = "research-assistant"
-        #     use_streaming = True
-        #
-        #     # Display user ID (for debugging or user information)
-        #     st.text_input("User ID (read-only)", value=user_id, disabled=True)
-
     # Draw existing messages
     messages: list[ChatMessage] = st.session_state.messages
 
@@ -161,14 +144,6 @@ async def main() -> None:
                     user_id=user_id,
                 )
                 await draw_messages(stream, is_new=True)
-            else:
-                response = await agent_client.ainvoke(
-                    message=user_input,
-                    thread_id=st.session_state.thread_id,
-                    user_id=user_id,
-                )
-                messages.append(response)
-                st.chat_message("ai").write(response.content)
             st.rerun()  # Clear stale containers
         except AgentClientError as e:
             st.error(f"Error generating response: {e}")
@@ -267,7 +242,7 @@ async def draw_messages(
                         call_results = {}
                         for tool_call in msg.tool_calls:
                             status = st.status(
-                                f"""Tool Call: {tool_call["name"]}""",
+                                f"""MCP Call: {tool_call["name"]}""",
                                 state="running" if is_new else "complete",
                             )
                             call_results[tool_call["id"]] = status
@@ -292,31 +267,6 @@ async def draw_messages(
                             status.write("Output:")
                             status.write(tool_result.content)
                             status.update(state="complete")
-
-            case "custom":
-                # CustomData example used by the bg-task-agent
-                # See:
-                # - src/agents/utils.py CustomData
-                # - src/agents/bg_task_agent/task.py
-                try:
-                    task_data: TaskData = TaskData.model_validate(msg.custom_data)
-                except ValidationError:
-                    st.error("Unexpected CustomData message received from agent")
-                    st.write(msg.custom_data)
-                    st.stop()
-
-                if is_new:
-                    st.session_state.messages.append(msg)
-
-                if last_message_type != "task":
-                    last_message_type = "task"
-                    st.session_state.last_message = st.chat_message(
-                        name="task", avatar=":material/manufacturing:"
-                    )
-                    with st.session_state.last_message:
-                        status = TaskDataStatus()
-
-                status.add_and_draw_task_data(task_data)
 
             # In case of an unexpected message type, log an error and stop
             case _:
