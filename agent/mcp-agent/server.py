@@ -73,22 +73,6 @@ app = FastAPI(lifespan=lifespan)
 router = APIRouter(dependencies=[Depends(verify_bearer)])
 
 
-@router.get("/info")
-async def info() -> ServiceMetadata:
-    models = list(constants.AVAILABLE_MODELS)
-    models.sort()
-    logger.info(ServiceMetadata(
-        models=models,
-        default_agent="research-assistant",
-        default_model=constants.DEFAULT_MODEL,
-    ))
-    return ServiceMetadata(
-        models=models,
-        default_agent="research-assistant",
-        default_model=constants.DEFAULT_MODEL,
-    )
-
-
 async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str, Any], UUID]:
     """
     Parse user input and handle any required interrupt resumption.

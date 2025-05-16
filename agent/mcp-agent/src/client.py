@@ -43,12 +43,7 @@ class AgentClient:
         self.base_url = base_url
         self.auth_secret = os.getenv("AUTH_SECRET")
         self.timeout = timeout
-        self.info: ServiceMetadata | None = None
         self.agent: str | None = None
-        if get_info:
-            self.retrieve_info()
-        if agent:
-            self.update_agent(agent)
 
     @property
     def _headers(self) -> dict[str, str]:
@@ -57,31 +52,6 @@ class AgentClient:
             headers["Authorization"] = f"Bearer {self.auth_secret}"
         return headers
 
-    def retrieve_info(self) -> None:
-        try:
-            response = httpx.get(
-                f"{self.base_url}/info",
-                headers=self._headers,
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-        except httpx.HTTPError as e:
-            raise AgentClientError(f"Error getting service info: {e}")
-
-        self.info = ServiceMetadata.model_validate(response.json())
-        if not self.agent or self.agent not in [a.key for a in self.info.agents]:
-            self.agent = self.info.default_agent
-
-    def update_agent(self, agent: str, verify: bool = True) -> None:
-        if verify:
-            if not self.info:
-                self.retrieve_info()
-            agent_keys = [a.key for a in self.info.agents]  # type: ignore[union-attr]
-            if agent not in agent_keys:
-                raise AgentClientError(
-                    f"Agent {agent} not found in available agents: {', '.join(agent_keys)}"
-                )
-        self.agent = agent
 
     async def ainvoke(
         self,

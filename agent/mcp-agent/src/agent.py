@@ -35,44 +35,6 @@ instructions = f"""
     - Show how you are thinking and reasoning step-by-step and then respond with Final answer.
     """
 
-# instructions = f"""
-# You areToday's date is {current_date}.
-# You reason step-by-step to understand the user’s query, choose the correct tool, and use tool outputs to form your response. You always follow the pattern:
-# **Thought → Action → Observation → (repeat if needed) → Final Answer**.
-#
-# You have access to the following tools:
-#
-# 1. **Email Agent Tool**
-#    - Use this tool **only if the user explicitly requests to send an email**.
-#    - If the name of the recipient is not mentioned then send the email to Tuhin.
-#    - Remember your name and signature are "Fedora" when you send an email.
-#    - This tool requires an email subject and an email body.
-#    - You must use information from the other tools to help compose the message.
-#
-# 2. **BMI Agent Tool**
-#    - Use this tool the user asks about calculating BMI.
-#    - This tool requires a height in cms and weight in kgs for a person. If not provided use other tools to infer it.
-#    - You can use information from the other tools if height and weight are not provided.
-#
-# 3. **Websearch Tool**
-#    - Use this when the user question cannot be answered by the Christmas or Medium or BMI tools.
-#    - Only call this when the topic is outside the coverage of the other three tools.
-#
-# ### 🔐 Rules:
-# - DO NOT answer directly from internal knowledge.
-# - You must always reason before acting.
-# - Every Final Answer must be grounded in tool observations.
-# - If tool output is insufficient, continue the loop with another Thought → Action or ask the user for more information.
-# - Only send emails when clearly instructed by the user.
-# - Please include markdown-formatted links to any citations used in your response.
-# Only include one or two citations per response unless more are needed.
-# always make sure your answer is *FORMATTED WELL*
-#
-# Show how you are thinking and reasoning step-by-step and then respond with Final answer.
-#
-# """
-
-
 @asynccontextmanager
 async def get_research_assistant():
     mcp_bmi_host = os.getenv("MCP_BMI_HOST", "0.0.0.0")
@@ -83,7 +45,8 @@ async def get_research_assistant():
     mcp_email_port = os.getenv("MCP_EMAIL_PORT", "2002")
     mcp_websearch_port = os.getenv("MCP_WEBSEARCH_PORT", "3002")
 
-    async with MultiServerMCPClient(
+    async with initialize_database() as saver, initialize_store() as store:
+        client = MultiServerMCPClient(
             {
                 "bmi_agent_tool": {
                     "url": f"http://{mcp_bmi_host}:{mcp_bmi_port}/sse",
@@ -98,16 +61,20 @@ async def get_research_assistant():
                     "transport": "sse"
                 }
             }
-    ) as client, initialize_database() as saver, initialize_store() as store:
+        )
+
+        tools = await client.get_tools()
         # Set up both components
-        if hasattr(saver, "setup"):  # ignore: union-attr
+        if hasattr(saver, "setup"):
+            logger.info("Setting up saver")# ignore: union-attr
             await saver.setup()
         # Only setup store for Postgres as InMemoryStore doesn't need setup
-        if hasattr(store, "setup"):  # ignore: union-attr
+        if hasattr(store, "setup"):
+            logger.info("Setting up store")# ignore: union-attr
             await store.setup()
         agent = create_react_agent(
             model=model,
-            tools=client.get_tools(),
+            tools=tools,
             prompt=instructions,
             store=store,
             checkpointer=saver
