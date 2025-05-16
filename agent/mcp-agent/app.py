@@ -242,7 +242,7 @@ async def draw_messages(
                         call_results = {}
                         for tool_call in msg.tool_calls:
                             status = st.status(
-                                f"""MCP Call: {tool_call["name"]}""",
+                                f"""Remote MCP Call: {tool_call["name"]}""",
                                 state="running" if is_new else "complete",
                             )
                             call_results[tool_call["id"]] = status

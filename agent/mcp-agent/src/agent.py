@@ -96,7 +96,7 @@ async def main():
         # Test queries
         test_queries = [
             # Math question
-            "What is 300 * 200?",
+            "what is the stock price of IBM? check websearch",
 
             # # Web search question
             # "What are the latest developments in artificial intelligence?",
