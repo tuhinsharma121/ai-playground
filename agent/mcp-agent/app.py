@@ -114,6 +114,74 @@ async def main() -> None:
             st.session_state.thread_id = str(uuid.uuid4())
             st.rerun()
 
+        # Display chat history in sidebar
+        st.subheader("Chat History")
+
+        # Initialize chat_history and chat_order in session state if they don't exist
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = {}
+
+        # Initialize chat_order to maintain consistent ordering
+        if "chat_order" not in st.session_state:
+            st.session_state.chat_order = []
+
+        # Store current thread in chat history if it has messages
+        if len(st.session_state.messages) > 0:
+            # Generate a title from the first user message or use default
+            thread_title = "New Chat"
+            for msg in st.session_state.messages:
+                if msg.type == "human":
+                    thread_title = msg.content[:20] + "..." if len(msg.content) > 20 else msg.content
+                    break
+
+            current_thread_id = st.session_state.thread_id
+
+            # Check if this is a new thread to add to our order
+            if current_thread_id not in st.session_state.chat_history:
+                # Add new threads to the beginning of the order list
+                st.session_state.chat_order.insert(0, current_thread_id)
+
+            # Store or update in chat history
+            st.session_state.chat_history[current_thread_id] = {
+                "title": thread_title,
+                "last_updated": asyncio.get_event_loop().time(),  # Still keep timestamp for other purposes
+            }
+
+        # Display chat history
+        if st.session_state.chat_history:
+            # Use our maintained order instead of sorting every time
+            for thread_id in st.session_state.chat_order:
+                # Skip if thread no longer exists in history
+                if thread_id not in st.session_state.chat_history:
+                    continue
+
+                thread_info = st.session_state.chat_history[thread_id]
+                thread_title = thread_info["title"]
+
+                # Mark current thread with a different icon or style
+                if thread_id == st.session_state.thread_id:
+                    # Current conversation - show as active/selected
+                    st.button(f"🟢 {thread_title}", key=f"history_{thread_id}", use_container_width=True, disabled=True)
+                else:
+                    # Other conversations - clickable to switch
+                    if st.button(f"💬 {thread_title}", key=f"history_{thread_id}", use_container_width=True):
+                        # Switch to this thread
+                        st.session_state.thread_id = thread_id
+                        try:
+                            # Get thread history
+                            history = agent_client.get_history(thread_id=thread_id)
+                            st.session_state.messages = history.messages
+                            st.rerun()
+                        except AgentClientError as e:
+                            st.error(f"Could not load chat history: {e}")
+                            # Keep the thread in history but mark as unavailable
+                            thread_info["unavailable"] = True
+        else:
+            st.info("No previous chats")
+
+        st.divider()
+
+        # Additional sidebar options
         agent_client.agent = "research-assistant"
         use_streaming = True
 
