@@ -172,3 +172,20 @@ class AgentClient:
             raise AgentClientError(f"Error: {e}")
 
         return ChatHistory.model_validate(response.json())
+
+    def get_all_thread_ids(self) -> list[str]:
+
+        try:
+            response = httpx.get(
+                f"{self.base_url}/threads",
+                headers=self._headers,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+        except httpx.HTTPError as e:
+            raise AgentClientError(f"Error: {e}")
+
+        # logger.info(f"Thread IDs: {response.json()}")
+
+        return response.json()
+

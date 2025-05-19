@@ -21,8 +21,26 @@ logger = get_python_logger()
 
 
 APP_TITLE = "Hello Red Hat"
-APP_ICON = "🧰"
+# APP_ICON = "🧰"
 USER_ID_COOKIE = "user_id"
+
+# Replace the emoji icon with custom icon
+# APP_ICON = "🧰"  # Comment out or remove this line
+
+# Add this near the top of your file, after the imports
+import base64
+
+
+def get_img_as_base64(file_path):
+    """Convert an image file to base64 string"""
+    with open(file_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
+
+# Function to display image in sidebar header
+def get_image_html(image_path, width=30):
+    """Create HTML for displaying an image"""
+    return f'<img src="data:image/png;base64,{get_img_as_base64(image_path)}" width="{width}">'
 
 
 def get_or_create_user_id() -> str:
@@ -52,7 +70,7 @@ def get_or_create_user_id() -> str:
 async def main() -> None:
     st.set_page_config(
         page_title=APP_TITLE,
-        page_icon=APP_ICON,
+        # page_icon=APP_ICON,
         menu_items={},
     )
 
@@ -103,11 +121,54 @@ async def main() -> None:
 
     # Config options
     with st.sidebar:
-        st.header(f"{APP_ICON} {APP_TITLE}")
+        # st.header(f"{APP_ICON} {APP_TITLE}")
 
-        ""
-        "Full toolkit for running an AI agent service built with LangGraph, FastAPI and Streamlit"
-        ""
+        icon_path = "fedora.png"  # Update with your actual icon path
+        # Custom CSS to center and align the header
+        st.markdown(
+            """
+            <style>
+            .app-header {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            .app-header img {
+                margin-right: 10px;
+            }
+            .app-header h1 {
+                font-size: 24px;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # App header with icon and title
+        st.markdown(
+            f"""
+                <div class="app-header">
+                    {get_image_html(icon_path, width=200)}
+                </div>
+                <div class="app-header">
+                    <h1>{APP_TITLE}</h1>
+                </div>
+                """,
+            unsafe_allow_html=True
+        )
+
+        # Subtitle text - centered
+        st.markdown(
+            """
+            <p style="text-align: center;">
+            Full toolkit for running an AI agent service built with LangGraph, FastAPI and Streamlit
+            </p>
+            """,
+            unsafe_allow_html=True
+        )
 
         if st.button(":material/chat: New Chat", use_container_width=True):
             st.session_state.messages = []
@@ -117,13 +178,9 @@ async def main() -> None:
         # Display chat history in sidebar
         st.subheader("Chat History")
 
-        # Initialize chat_history and chat_order in session state if they don't exist
+        # Initialize chat_history in session state if it doesn't exist
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = {}
-
-        # Initialize chat_order to maintain consistent ordering
-        if "chat_order" not in st.session_state:
-            st.session_state.chat_order = []
 
         # Store current thread in chat history if it has messages
         if len(st.session_state.messages) > 0:
@@ -134,50 +191,94 @@ async def main() -> None:
                     thread_title = msg.content[:20] + "..." if len(msg.content) > 20 else msg.content
                     break
 
-            current_thread_id = st.session_state.thread_id
-
-            # Check if this is a new thread to add to our order
-            if current_thread_id not in st.session_state.chat_history:
-                # Add new threads to the beginning of the order list
-                st.session_state.chat_order.insert(0, current_thread_id)
-
             # Store or update in chat history
-            st.session_state.chat_history[current_thread_id] = {
+            st.session_state.chat_history[st.session_state.thread_id] = {
                 "title": thread_title,
-                "last_updated": asyncio.get_event_loop().time(),  # Still keep timestamp for other purposes
+                "last_updated": asyncio.get_event_loop().time(),
             }
 
-        # Display chat history
-        if st.session_state.chat_history:
-            # Use our maintained order instead of sorting every time
-            for thread_id in st.session_state.chat_order:
-                # Skip if thread no longer exists in history
-                if thread_id not in st.session_state.chat_history:
-                    continue
+        # Get all thread IDs from the backend
+        try:
+            # Fetch all thread IDs
+            all_thread_ids = agent_client.get_all_thread_ids()
 
-                thread_info = st.session_state.chat_history[thread_id]
-                thread_title = thread_info["title"]
+            # If this is the first load and there are threads, fetch the first message for each thread
+            # to generate proper titles (only for threads not in our cache)
+            if "first_load" not in st.session_state and all_thread_ids:
+                st.session_state.first_load = False
 
-                # Mark current thread with a different icon or style
-                if thread_id == st.session_state.thread_id:
-                    # Current conversation - show as active/selected
-                    st.button(f"🟢 {thread_title}", key=f"history_{thread_id}", use_container_width=True, disabled=True)
-                else:
-                    # Other conversations - clickable to switch
-                    if st.button(f"💬 {thread_title}", key=f"history_{thread_id}", use_container_width=True):
-                        # Switch to this thread
-                        st.session_state.thread_id = thread_id
-                        try:
-                            # Get thread history
-                            history = agent_client.get_history(thread_id=thread_id)
-                            st.session_state.messages = history.messages
-                            st.rerun()
-                        except AgentClientError as e:
-                            st.error(f"Could not load chat history: {e}")
-                            # Keep the thread in history but mark as unavailable
-                            thread_info["unavailable"] = True
-        else:
-            st.info("No previous chats")
+                # Limit how many threads we prefetch to avoid performance issues (e.g., fetch at most 10)
+                threads_to_fetch = [tid for tid in all_thread_ids[:10] if tid not in st.session_state.chat_history]
+
+                # Fetch first message for each thread
+                for thread_id in threads_to_fetch:
+                    try:
+                        # We might want to add a method to just get the first few messages to improve performance
+                        thread_history = agent_client.get_history(thread_id=thread_id)
+                        thread_messages = thread_history.messages
+
+                        # Generate a title from the first user message
+                        thread_title = f"Chat {thread_id[:8]}..."  # Default fallback
+                        for msg in thread_messages:
+                            if msg.type == "human":
+                                thread_title = msg.content[:20] + "..." if len(msg.content) > 20 else msg.content
+                                break
+
+                        # Store in chat history
+                        st.session_state.chat_history[thread_id] = {
+                            "title": thread_title,
+                            "last_updated": 0,  # We don't know the actual timestamp, so use 0
+                        }
+                    except AgentClientError:
+                        # If we can't load this thread, just skip it
+                        continue
+
+            # Display chat history
+            if all_thread_ids:
+                for thread_id in all_thread_ids:
+                    # If we have info about this thread in the session, use it
+                    if thread_id in st.session_state.chat_history:
+                        thread_info = st.session_state.chat_history[thread_id]
+                        thread_title = thread_info.get("title", f"Chat {thread_id[:8]}...")
+                    else:
+                        # For threads we haven't seen yet, use a default title
+                        thread_title = f"Chat {thread_id[:8]}..."
+
+                    # Mark current thread with a different icon or style
+                    if thread_id == st.session_state.thread_id:
+                        # Current conversation - show as active/selected
+                        st.button(f"🟢 {thread_title}", key=f"history_{thread_id}", use_container_width=True,
+                                  disabled=True)
+                    else:
+                        # Other conversations - clickable to switch
+                        if st.button(f"💬 {thread_title}", key=f"history_{thread_id}", use_container_width=True):
+                            # Switch to this thread
+                            st.session_state.thread_id = thread_id
+                            try:
+                                # Get thread history
+                                history = agent_client.get_history(thread_id=thread_id)
+                                st.session_state.messages = history.messages
+
+                                # Update the title in our local cache based on actual messages
+                                thread_title = "Chat"
+                                for msg in st.session_state.messages:
+                                    if msg.type == "human":
+                                        thread_title = msg.content[:20] + "..." if len(
+                                            msg.content) > 20 else msg.content
+                                        break
+
+                                st.session_state.chat_history[thread_id] = {
+                                    "title": thread_title,
+                                    "last_updated": asyncio.get_event_loop().time(),
+                                }
+
+                                st.rerun()
+                            except AgentClientError as e:
+                                st.error(f"Could not load chat history: {e}")
+            else:
+                st.info("No previous chats")
+        except AgentClientError as e:
+            st.error(f"Could not fetch chat history: {e}")
 
         st.divider()
 
@@ -187,11 +288,6 @@ async def main() -> None:
 
     # Draw existing messages
     messages: list[ChatMessage] = st.session_state.messages
-
-    if len(messages) == 0:
-        with st.chat_message("ai"):
-            WELCOME = "Hello! I'm an AI-powered research assistant. Ask me anything!"
-            st.write(WELCOME)
 
     # draw_messages() expects an async iterator over messages
     async def amessage_iter() -> AsyncGenerator[ChatMessage, None]:
