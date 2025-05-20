@@ -164,7 +164,7 @@ async def main() -> None:
         st.markdown(
             """
             <p style="text-align: center;">
-            Full toolkit for running an AI agent service built with LangGraph, FastAPI and Streamlit
+            I am AI Assistant. Ask me anything!
             </p>
             """,
             unsafe_allow_html=True
