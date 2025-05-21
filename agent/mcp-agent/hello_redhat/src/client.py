@@ -5,25 +5,27 @@ from typing import Any
 
 import httpx
 
-from src.schema import (
+from utils.pylogger import get_python_logger
+from utils.schema import (
     ChatMessage,
     Feedback,
     StreamInput, ChatHistoryInput, ChatHistory,
 )
 
-from pylogger import get_python_logger
 logger = get_python_logger()
+
 
 class AgentClientError(Exception):
     pass
 
-
+host = os.getenv("AGENT_HOST", "0.0.0.0")
+port = os.getenv("AGENT_PORT", "8000")
 class AgentClient:
     """Client for interacting with the agent service."""
 
     def __init__(
             self,
-            base_url: str = "http://0.0.0.0:8000",
+            base_url: str = f"http://{host}:{port}",
             timeout: float | None = None,
     ) -> None:
         """
@@ -188,4 +190,3 @@ class AgentClient:
         # logger.info(f"Thread IDs: {response.json()}")
 
         return response.json()
-

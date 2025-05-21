@@ -4,8 +4,7 @@ Tavily Search MCP Server using SSE transport
 from mcp.server.fastmcp import FastMCP
 import os
 import httpx
-import json
-from pylogger import get_python_logger
+from utils.pylogger import get_python_logger
 
 # Set up logging
 logger = get_python_logger(log_level=os.getenv("PYTHON_LOG_LEVEL", "INFO"))

@@ -5,14 +5,11 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP(name="BMI Agent Tool")
 
 # Import all the tools
-import json
 import os
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-import requests
-
-from pylogger import get_python_logger
+from utils.pylogger import get_python_logger
 
 logger = get_python_logger(log_level=os.getenv("PYTHON_LOG_LEVEL", "INFO"))
 
@@ -32,7 +29,7 @@ def train_bmi_ml_model():
     """
 
     # Data is downloaded from https://www.kaggle.com/datasets/rukenmissonnier/age-weight-height-bmi-analysis
-    df = pd.read_csv("src/bmi.csv")
+    df = pd.read_csv("mcp_bmi/data/bmi.csv")
     df.head()
 
     Y = df['BMI']

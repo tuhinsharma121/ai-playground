@@ -8,7 +8,7 @@ mcp = FastMCP(name="Email Agent Tool")
 import resend
 import os
 
-from pylogger import get_python_logger
+from utils.pylogger import get_python_logger
 
 logger = get_python_logger(log_level=os.getenv("PYTHON_LOG_LEVEL", "INFO"))
 

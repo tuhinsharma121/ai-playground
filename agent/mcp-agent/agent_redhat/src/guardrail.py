@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from pydantic import BaseModel, Field
 
-from pylogger import get_python_logger
+from utils.pylogger import get_python_logger
 
 from constants import constants
 

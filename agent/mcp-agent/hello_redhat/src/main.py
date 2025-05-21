@@ -1,34 +1,18 @@
 import asyncio
+import base64
 import uuid
 from collections.abc import AsyncGenerator
 
 import streamlit as st
 
-from pylogger import get_python_logger
-from src.client import AgentClient, AgentClientError
-from src.schema import ChatHistory, ChatMessage
+from hello_redhat.src.client import AgentClient, AgentClientError
+from utils.pylogger import get_python_logger
+from utils.schema import ChatHistory, ChatMessage
 
 logger = get_python_logger()
-# A Streamlit app for interacting with the langgraph agent via a simple chat interface.
-# The app has three main functions which are all run async:
-
-# - main() - sets up the streamlit app and high level structure
-# - draw_messages() - draws a set of chat messages - either replaying existing messages
-#   or streaming new ones.
-# - handle_feedback() - Draws a feedback widget and records feedback from the user.
-
-# The app heavily uses AgentClient to interact with the agent's FastAPI endpoints.
-
 
 APP_TITLE = "Hello Red Hat"
-# APP_ICON = "🧰"
 USER_ID_COOKIE = "user_id"
-
-# Replace the emoji icon with custom icon
-# APP_ICON = "🧰"  # Comment out or remove this line
-
-# Add this near the top of your file, after the imports
-import base64
 
 
 def get_img_as_base64(file_path):
@@ -123,7 +107,7 @@ async def main() -> None:
     with st.sidebar:
         # st.header(f"{APP_ICON} {APP_TITLE}")
 
-        icon_path = "fedora.png"  # Update with your actual icon path
+        icon_path = "hello_redhat/images/redhat.png"  # Update with your actual icon path
         # Custom CSS to center and align the header
         st.markdown(
             """

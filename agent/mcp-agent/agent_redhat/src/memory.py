@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.store.memory import InMemoryStore
 
-from constants import constants
+from agent_redhat.src.constants import constants
 
 
 def get_sqlite_saver() -> AbstractAsyncContextManager[AsyncSqliteSaver]:

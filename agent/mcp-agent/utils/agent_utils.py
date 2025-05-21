@@ -8,7 +8,7 @@ from langchain_core.messages import (
     ChatMessage as LangchainChatMessage,
 )
 
-from src.schema import ChatMessage
+from utils.schema import ChatMessage
 
 
 def convert_message_content_to_string(content: str | list[str | dict]) -> str:

@@ -5,7 +5,7 @@ from pydantic import (
 )
 from pydantic_settings import BaseSettings
 
-from src.schema import (
+from utils.schema import (
     AllModelEnum,
     DeepseekModelName,
     GoogleModelName,
@@ -20,7 +20,7 @@ class Constants(BaseSettings):
     AUTH_SECRET: SecretStr | None = None
     DEFAULT_MODEL: AllModelEnum | None = None  # type: ignore[assignment]
     AVAILABLE_MODELS: set[AllModelEnum] = set()  # type: ignore[assignment]
-    SQLITE_DB_PATH: str = "checkpoints.db"
+    SQLITE_DB_PATH: str = "../../checkpoints.db"
     OPENAI_API_KEY: SecretStr | None = None
     DEEPSEEK_API_KEY: SecretStr | None = None
     GOOGLE_API_KEY: SecretStr | None = None
