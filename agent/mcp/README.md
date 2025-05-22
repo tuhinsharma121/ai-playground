@@ -12,6 +12,8 @@ Set the following environment variables in your system.
 3. `$RESEND_EMAIL_ID` - Your resend email id that you used to sign up
 4. `$GOOGLE_API_KEY` - Sign up on `console.cloud.google.com` and get your google api key
 5. `$GEMINI_API_KEY` - Sign up on `aistudio.google.com` and get your gemini api key
+6. `TAVILIA_API_KEY` - Sign up on `tavily.com` and get your tavily api key
+
 
 ## Technology Stack
 
