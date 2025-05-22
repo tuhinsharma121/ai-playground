@@ -75,7 +75,6 @@ class AgentClient:
     async def astream(
             self,
             message: str,
-            model: str | None = None,
             thread_id: str | None = None,
             user_id: str | None = None,
             agent_config: dict[str, Any] | None = None,
@@ -90,7 +89,6 @@ class AgentClient:
 
         Args:
             message (str): The message to send to the agent
-            model (str, optional): LLM model to use for the agent
             thread_id (str, optional): Thread ID for continuing a conversation
             user_id (str, optional): User ID for continuing a conversation across multiple threads
             agent_config (dict[str, Any], optional): Additional configuration to pass through to the agent
@@ -105,8 +103,6 @@ class AgentClient:
         request = StreamInput(message=message, stream_tokens=stream_tokens)
         if thread_id:
             request.thread_id = thread_id
-        if model:
-            request.model = model  # type: ignore[assignment]
         if agent_config:
             request.agent_config = agent_config
         if user_id:

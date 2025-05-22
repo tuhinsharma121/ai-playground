@@ -80,6 +80,11 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     thread_id = user_input.thread_id or str(uuid4())
     user_id = user_input.user_id or str(uuid4())
 
+    from langfuse.callback import CallbackHandler
+
+    # Initialize Langfuse CallbackHandler for Langchain (tracing)
+    langfuse_handler = CallbackHandler()
+
     configurable = {"thread_id": thread_id, "model": user_input.model, "user_id": user_id}
 
     if user_input.agent_config:
@@ -93,6 +98,7 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     config = RunnableConfig(
         configurable=configurable,
         run_id=run_id,
+        callbacks=[langfuse_handler],
     )
 
     # Check for interrupts that need to be resumed
@@ -129,6 +135,7 @@ async def message_generator(
         kwargs, run_id = await _handle_input(user_input, agent)
 
         try:
+            logger.info(f"Running agent with kwargs: {kwargs}")
             # Process streamed events from the graph and yield messages over the SSE stream.
             async for stream_event in agent.astream(
                     **kwargs, stream_mode=["updates", "messages", "custom"]
@@ -136,6 +143,7 @@ async def message_generator(
                 if not isinstance(stream_event, tuple):
                     continue
                 stream_mode, event = stream_event
+                logger.info(f"Stream mode: {stream_mode}, event: {event}")
                 new_messages = []
                 if stream_mode == "updates":
                     for node, updates in event.items():
@@ -271,6 +279,25 @@ async def stream(user_input: StreamInput) -> StreamingResponse:
     )
 
 
+# @router.post("/feedback")
+# async def feedback(feedback: Feedback) -> FeedbackResponse:
+#     """
+#     Record feedback for a run to LangSmith.
+#
+#     This is a simple wrapper for the LangSmith create_feedback API, so the
+#     credentials can be stored and managed in the service rather than the client.
+#     See: https://api.smith.langchain.com/redoc#tag/feedback/operation/create_feedback_api_v1_feedback_post
+#     """
+#     client = LangsmithClient()
+#     kwargs = feedback.kwargs or {}
+#     client.create_feedback(
+#         run_id=feedback.run_id,
+#         key=feedback.key,
+#         score=feedback.score,
+#         **kwargs,
+#     )
+#     return FeedbackResponse()
+
 @router.post("/feedback")
 async def feedback(feedback: Feedback) -> FeedbackResponse:
     """
@@ -280,16 +307,19 @@ async def feedback(feedback: Feedback) -> FeedbackResponse:
     credentials can be stored and managed in the service rather than the client.
     See: https://api.smith.langchain.com/redoc#tag/feedback/operation/create_feedback_api_v1_feedback_post
     """
-    client = LangsmithClient()
+    from langfuse import Langfuse
+
+    client = Langfuse()
     kwargs = feedback.kwargs or {}
-    client.create_feedback(
-        run_id=feedback.run_id,
-        key=feedback.key,
-        score=feedback.score,
+
+    # Langfuse uses different parameter names
+    client.score(
+        trace_id=feedback.run_id,  # Assuming run_id maps to trace_id
+        name=feedback.key,  # 'key' becomes 'name' in Langfuse
+        value=feedback.score,  # 'score' becomes 'value' in Langfuse
         **kwargs,
     )
     return FeedbackResponse()
-
 
 @router.post("/history")
 async def history(input: ChatHistoryInput) -> ChatHistory:
@@ -312,6 +342,53 @@ async def history(input: ChatHistoryInput) -> ChatHistory:
 
 
 # Then expose this in your API
+# @router.get("/threads")
+# async def list_threads() -> list[str]:
+#     """
+#     Get a list of all thread IDs in the system.
+#     """
+#     try:
+#         # Connect to the SQLite database
+#         with sqlite3.connect(constants.SQLITE_DB_PATH) as conn:
+#             cursor = conn.cursor()
+#
+#             # First, let's check what tables exist
+#             cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+#             tables = [table[0] for table in cursor.fetchall()]
+#
+#             logger.info(f"Tables: {tables}")
+#
+#             if 'checkpoints' not in tables:
+#                 logger.warning("Checkpoints table not found in SQLite database")
+#                 return []
+#
+#             # Examine the schema of the checkpoints table
+#             cursor.execute("PRAGMA table_info(checkpoints);")
+#             columns = [column[1] for column in cursor.fetchall()]
+#
+#             logger.info(f"Columns: {columns}")
+#
+#             # Now query based on the actual schema
+#             if 'thread_id' in columns:
+#                 cursor.execute("SELECT DISTINCT thread_id FROM checkpoints;")
+#                 keys = [row[0] for row in cursor.fetchall()]
+#
+#                 # Try to extract thread IDs from keys
+#                 thread_ids = set()
+#                 for key in keys:
+#                     # Assuming the format is typically 'thread_id:...'
+#                     parts = key.split(':', 1)
+#                     if len(parts) > 0:
+#                         thread_ids.add(parts[0])
+#
+#                 return list(thread_ids)
+#             else:
+#                 logger.warning("Could not find key column in checkpoints table")
+#                 return []
+#     except Exception as e:
+#         logger.error(f"An exception occurred: {e}")
+#         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
 @router.get("/threads")
 async def list_threads() -> list[str]:
     """
@@ -319,42 +396,14 @@ async def list_threads() -> list[str]:
     """
     try:
         # Connect to the SQLite database
-        with sqlite3.connect(constants.SQLITE_DB_PATH) as conn:
-            cursor = conn.cursor()
-
-            # First, let's check what tables exist
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            tables = [table[0] for table in cursor.fetchall()]
-
-            logger.info(f"Tables: {tables}")
-
-            if 'checkpoints' not in tables:
-                logger.warning("Checkpoints table not found in SQLite database")
-                return []
-
-            # Examine the schema of the checkpoints table
-            cursor.execute("PRAGMA table_info(checkpoints);")
-            columns = [column[1] for column in cursor.fetchall()]
-
-            logger.info(f"Columns: {columns}")
-
-            # Now query based on the actual schema
-            if 'thread_id' in columns:
-                cursor.execute("SELECT DISTINCT thread_id FROM checkpoints;")
-                keys = [row[0] for row in cursor.fetchall()]
-
-                # Try to extract thread IDs from keys
-                thread_ids = set()
-                for key in keys:
-                    # Assuming the format is typically 'thread_id:...'
-                    parts = key.split(':', 1)
-                    if len(parts) > 0:
-                        thread_ids.add(parts[0])
-
-                return list(thread_ids)
-            else:
-                logger.warning("Could not find key column in checkpoints table")
-                return []
+        import psycopg2
+        from agent_redhat.src.memory import get_postgres_connection_string
+        with psycopg2.connect(get_postgres_connection_string()) as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT distinct thread_id FROM checkpoints")
+            rows = cur.fetchall()
+            thread_ids = [row[0] for row in rows]
+            return thread_ids
     except Exception as e:
         logger.error(f"An exception occurred: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
@@ -370,3 +419,4 @@ app.include_router(router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, )
+

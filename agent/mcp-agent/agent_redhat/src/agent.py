@@ -1,9 +1,9 @@
 import os
 import uuid
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
 from typing import List, Literal
 
 from langchain_core.language_models import BaseChatModel
@@ -19,8 +19,8 @@ from langgraph.managed import RemainingSteps
 from langgraph.prebuilt import ToolNode
 
 from agent_redhat.src.constants import constants
+from agent_redhat.src.memory import get_postgres_store, get_postgres_saver
 from utils.pylogger import get_python_logger
-from agent_redhat.src.memory import initialize_database, initialize_store
 
 # =====================================================================
 # CONFIGURATION
@@ -217,7 +217,7 @@ async def get_agent_redhat():
     mcp_email_port = os.getenv("MCP_EMAIL_PORT", "2002")
     mcp_websearch_port = os.getenv("MCP_WEBSEARCH_PORT", "3002")
 
-    async with initialize_database() as checkpointer, initialize_store() as store:
+    async with get_postgres_saver() as checkpointer, get_postgres_store() as store:
         # Initialize MCP client and get tools
         client = MultiServerMCPClient(
             {
@@ -275,12 +275,18 @@ async def get_agent_redhat():
 
         yield agent_redhat
 
+
 async def main():
     """Main function to test the research assistant."""
 
     # Create a thread ID for conversation continuity
     thread_id = str(uuid.uuid4())
-    config = {"configurable": {"thread_id": thread_id}}
+
+    from langfuse.callback import CallbackHandler
+
+    # Initialize Langfuse CallbackHandler for Langchain (tracing)
+    langfuse_handler = CallbackHandler()
+    config = {"configurable": {"thread_id": thread_id}, "callbacks": [langfuse_handler]}
     logger.info(f"config: {config}")
 
     from langgraph.prebuilt import create_react_agent
@@ -289,10 +295,10 @@ async def main():
     def hello():
         """Hello world!"""
         pass
-    agent = create_react_agent(model=ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.5, streaming=True), tools=[hello])
+
+    agent = create_react_agent(model=ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.5, streaming=True),
+                               tools=[hello])
     agent.get_graph().draw_png("react_agent.png")
-
-
 
     async with get_agent_redhat() as research_assistant:
         research_assistant.get_graph().draw_png("redhat_agent.png")

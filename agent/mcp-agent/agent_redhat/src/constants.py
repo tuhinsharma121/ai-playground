@@ -14,6 +14,8 @@ from utils.schema import (
     Provider,
 )
 
+import os
+
 
 class Constants(BaseSettings):
     LOG_LEVEL: str | None = "INFO"
@@ -25,6 +27,13 @@ class Constants(BaseSettings):
     DEEPSEEK_API_KEY: SecretStr | None = None
     GOOGLE_API_KEY: SecretStr | None = None
     GROQ_API_KEY: SecretStr | None = None
+
+    # PostgreSQL Configuration
+    POSTGRES_USER: str | None = os.getenv("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD: SecretStr | None = os.getenv("POSTGRES_PASSWORD", "postgres")
+    POSTGRES_HOST: str | None = os.getenv("POSTGRES_HOST", "0.0.0.0")
+    POSTGRES_PORT: int | None = int(os.getenv("POSTGRES_PORT", "5432"))
+    POSTGRES_DB: str | None = os.getenv("POSTGRES_DB", "postgres")
 
     def model_post_init(self, __context: Any) -> None:
         api_keys = {

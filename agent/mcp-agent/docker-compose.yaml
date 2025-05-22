@@ -44,6 +44,25 @@ services:
       - PORT=3002
     ports:
       - "3002:3002"
+  postgres:
+    image: postgres:16
+    container_name: "postgres"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - dataverse_ai_nw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   agent_redhat:
     build:
       context: "."
@@ -54,9 +73,20 @@ services:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      - LANGFUSE_HOST=${LANGFUSE_HOST}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
       - MCP_WEBSEARCH_HOST=mcp_websearch
       - MCP_EMAIL_HOST=mcp_email
       - MCP_BMI_HOST=mcp_bmi
@@ -86,3 +116,5 @@ services:
       - "8501:8501"
 networks:
   dataverse_ai_nw: { }
+volumes:
+  postgres_data:
