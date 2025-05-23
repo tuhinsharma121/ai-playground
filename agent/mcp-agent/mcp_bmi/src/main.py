@@ -121,4 +121,4 @@ if __name__ == "__main__":
     logger.info("Starting BMI Agent MCP server")
     mcp.settings.port = int(os.getenv("PORT", "1002"))
     mcp.settings.host = "0.0.0.0"
-    mcp.run(transport="sse")
+    mcp.run(transport="streamable-http")

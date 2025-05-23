@@ -222,16 +222,16 @@ async def get_agent_redhat():
         client = MultiServerMCPClient(
             {
                 "bmi_agent_tool": {
-                    "url": f"http://{mcp_bmi_host}:{mcp_bmi_port}/sse",
-                    "transport": "sse"
+                    "url": f"http://{mcp_bmi_host}:{mcp_bmi_port}/mcp",
+                    "transport": "streamable_http"
                 },
                 "websearch_agent_tool": {
-                    "url": f"http://{mcp_websearch_host}:{mcp_websearch_port}/sse",
-                    "transport": "sse"
+                    "url": f"http://{mcp_websearch_host}:{mcp_websearch_port}/mcp",
+                    "transport": "streamable_http"
                 },
                 "email_agent_tool": {
-                    "url": f"http://{mcp_email_host}:{mcp_email_port}/sse",
-                    "transport": "sse"
+                    "url": f"http://{mcp_email_host}:{mcp_email_port}/mcp",
+                    "transport": "streamable_http"
                 }
             }
         )

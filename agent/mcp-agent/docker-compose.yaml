@@ -13,6 +13,11 @@ services:
       - PORT=1002
     ports:
       - "1002:1002"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   mcp_email:
     build:
       context: "."
@@ -29,6 +34,11 @@ services:
       - PORT=2002
     ports:
       - "2002:2002"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   mcp_websearch:
     build:
       context: "."
@@ -44,6 +54,11 @@ services:
       - PORT=3002
     ports:
       - "3002:3002"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   postgres:
     image: postgres:16
     container_name: "postgres"
@@ -76,6 +91,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      mcp_bmi:
+        condition: service_healthy
+      mcp_email:
+        condition: service_healthy
+      mcp_websearch:
+        condition: service_healthy
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
@@ -96,6 +117,11 @@ services:
       - PORT=8000
     ports:
       - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   hello_redhat:
     build:
       context: "."
@@ -106,6 +132,14 @@ services:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
+    depends_on:
+      agent_redhat:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
       - AGENT_HOST=agent_redhat
       - AGENT_PORT=8000

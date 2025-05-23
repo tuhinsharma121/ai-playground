@@ -87,19 +87,19 @@ class UserInput(BaseModel):
         description="User input to the agent.",
         examples=["What is the weather in Tokyo?"],
     )
-    model: SerializeAsAny[AllModelEnum] | None = Field(
-        title="Model",
-        description="LLM Model to use for the agent.",
-        default=OpenAIModelName.GPT_4O_MINI,
-        examples=[OpenAIModelName.GPT_4O_MINI],
-    )
+    # model: SerializeAsAny[AllModelEnum] | None = Field(
+    #     title="Model",
+    #     description="LLM Model to use for the agent.",
+    #     default=OpenAIModelName.GPT_4O_MINI,
+    #     examples=[OpenAIModelName.GPT_4O_MINI],
+    # )
     thread_id: str | None = Field(
         description="Thread ID to persist and continue a multi-turn conversation.",
         default=None,
         examples=["847c6285-8fc9-4560-a83f-4e6285809254"],
     )
-    user_id: str | None = Field(
-        description="User ID to persist and continue a conversation across multiple threads.",
+    session_id: str | None = Field(
+        description="Session ID to persist and continue a conversation across multiple threads.",
         default=None,
         examples=["847c6285-8fc9-4560-a83f-4e6285809254"],
     )

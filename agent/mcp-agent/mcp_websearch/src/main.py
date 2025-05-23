@@ -101,4 +101,4 @@ if __name__ == "__main__":
     port = int(os.getenv("SEARCH_PORT", "3002"))
     mcp.settings.port = port
     mcp.settings.host = "0.0.0.0"
-    mcp.run(transport="sse")
+    mcp.run(transport="streamable-http")
