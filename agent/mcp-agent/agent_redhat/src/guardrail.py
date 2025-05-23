@@ -32,13 +32,19 @@ unsafe_content_categories = {
     "S4": "Child Exploitation.",
     "S5": "Defamation.",
     "S6": "Specialized Advice.",
-    # "S7": "Privacy.",
+    "S7": "Privacy.",
     "S8": "Intellectual Property.",
     "S9": "Indiscriminate Weapons.",
     "S10": "Hate.",
     "S11": "Self-Harm.",
     "S12": "Sexual Content.",
     "S13": "Elections."
+}
+
+unsafe_content_categories = {
+    "S1": "Violent Crimes.",
+    "S2": "Non-Violent Crimes.",
+    "S3": "Sex Crimes."
 }
 
 categories_str = "\n".join([f"{k}: {v}" for k, v in unsafe_content_categories.items()])
@@ -66,7 +72,7 @@ llama_guard_instructions = \
 class LlamaGuard:
     def __init__(self) -> None:
         if os.getenv("GROQ_API_KEY", None) is None:
-            print("GROQ_API_KEY not set, skipping LlamaGuard")
+            logger.warning("GROQ_API_KEY not set, skipping LlamaGuard")
             self.model = None
             return
         self.model = ChatGroq(model="meta-llama/llama-guard-4-12b", temperature=0.0).with_config(tags=["skip_stream"])
