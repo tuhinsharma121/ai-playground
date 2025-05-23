@@ -1,4 +1,4 @@
-FROM python:3.13.3-alpine
+FROM python:3.13.3
 LABEL maintainer="Tuhin Sharma <tuhinsharma121@gmail.com>"
 
 # --------------------------------------------------------------------------------------------------
@@ -13,6 +13,7 @@ ENV PYTHONPATH "${PYTHONPATH}:/app"
 # install python packages
 # --------------------------------------------------------------------------------------------------
 
+SHELL ["/bin/bash", "-c"]
 COPY hello_redhat/pyproject.toml /app/pyproject.toml
 RUN pip install uv
 RUN uv venv
@@ -25,6 +26,13 @@ RUN uv pip install -r /app/pyproject.toml
 
 COPY hello_redhat /app/hello_redhat
 COPY utils /app/utils
+
+# --------------------------------------------------------------------------------------------------
+# add healthcheck for the container
+# --------------------------------------------------------------------------------------------------
+
+ADD hello_redhat/deployment/healthcheck.sh /bin/healthcheck.sh
+RUN chmod +x /bin/healthcheck.sh
 
 # --------------------------------------------------------------------------------------------------
 # add entrypoint for the container

@@ -1,55 +1,7 @@
-from enum import StrEnum, auto
 from typing import Any, Literal, NotRequired
-from typing import TypeAlias
 
-from pydantic import BaseModel, Field, SerializeAsAny
+from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
-
-
-class Provider(StrEnum):
-    OPENAI = auto()
-    DEEPSEEK = auto()
-    GOOGLE = auto()
-    GROQ = auto()
-
-
-class OpenAIModelName(StrEnum):
-    """https://platform.openai.com/docs/models/gpt-4o"""
-
-    GPT_4O_MINI = "gpt-4o-mini"
-    GPT_4O = "gpt-4o"
-
-
-class DeepseekModelName(StrEnum):
-    """https://api-docs.deepseek.com/quick_start/pricing"""
-
-    DEEPSEEK_CHAT = "deepseek-chat"
-
-
-class GoogleModelName(StrEnum):
-    """https://ai.google.dev/gemini-api/docs/models/gemini"""
-
-    GEMINI_15_PRO = "gemini-1.5-pro"
-    GEMINI_20_FLASH = "gemini-2.0-flash"
-    # GEMINI_20_PRO_EXP = "gemini-2.0-pro-exp-02-05"
-    # GEMINI_20_FLASH_THINK = "gemini-2.0-flash-thinking-exp-01-21"
-
-
-class GroqModelName(StrEnum):
-    """https://console.groq.com/docs/models"""
-
-    LLAMA_31_8B = "llama-3.1-8b"
-    LLAMA_33_70B = "llama-3.3-70b"
-
-    LLAMA_GUARD_4_12B = "meta-llama/llama-guard-4-12b"
-
-
-AllModelEnum: TypeAlias = (
-        OpenAIModelName
-        | DeepseekModelName
-        | GoogleModelName
-        | GroqModelName
-)
 
 
 class AgentInfo(BaseModel):
@@ -65,21 +17,6 @@ class AgentInfo(BaseModel):
     )
 
 
-class ServiceMetadata(BaseModel):
-    """Metadata about the service including available agents and models."""
-
-    models: list[AllModelEnum] = Field(
-        description="List of available LLMs.",
-    )
-    default_agent: str = Field(
-        description="Default agent used when none is specified.",
-        examples=["research-assistant"],
-    )
-    default_model: AllModelEnum = Field(
-        description="Default model used when none is specified.",
-    )
-
-
 class UserInput(BaseModel):
     """Basic user input for the agent."""
 
@@ -87,19 +24,13 @@ class UserInput(BaseModel):
         description="User input to the agent.",
         examples=["What is the weather in Tokyo?"],
     )
-    model: SerializeAsAny[AllModelEnum] | None = Field(
-        title="Model",
-        description="LLM Model to use for the agent.",
-        default=OpenAIModelName.GPT_4O_MINI,
-        examples=[OpenAIModelName.GPT_4O_MINI],
-    )
     thread_id: str | None = Field(
         description="Thread ID to persist and continue a multi-turn conversation.",
         default=None,
         examples=["847c6285-8fc9-4560-a83f-4e6285809254"],
     )
-    user_id: str | None = Field(
-        description="User ID to persist and continue a conversation across multiple threads.",
+    session_id: str | None = Field(
+        description="Session ID to persist and continue a conversation across multiple threads.",
         default=None,
         examples=["847c6285-8fc9-4560-a83f-4e6285809254"],
     )
@@ -293,52 +224,3 @@ class TaskDataStatus:
             state = "running"
         status.update(state=state)  # type: ignore[arg-type]
 
-
-from enum import StrEnum, auto
-from typing import TypeAlias
-
-
-class Provider(StrEnum):
-    OPENAI = auto()
-    DEEPSEEK = auto()
-    GOOGLE = auto()
-    GROQ = auto()
-
-
-class OpenAIModelName(StrEnum):
-    """https://platform.openai.com/docs/models/gpt-4o"""
-
-    GPT_4O_MINI = "gpt-4o-mini"
-    GPT_4O = "gpt-4o"
-
-
-class DeepseekModelName(StrEnum):
-    """https://api-docs.deepseek.com/quick_start/pricing"""
-
-    DEEPSEEK_CHAT = "deepseek-chat"
-
-
-class GoogleModelName(StrEnum):
-    """https://ai.google.dev/gemini-api/docs/models/gemini"""
-
-    GEMINI_15_PRO = "gemini-1.5-pro"
-    GEMINI_20_FLASH = "gemini-2.0-flash"
-    # GEMINI_20_PRO_EXP = "gemini-2.0-pro-exp-02-05"
-    # GEMINI_20_FLASH_THINK = "gemini-2.0-flash-thinking-exp-01-21"
-
-
-class GroqModelName(StrEnum):
-    """https://console.groq.com/docs/models"""
-
-    LLAMA_31_8B = "llama-3.1-8b"
-    LLAMA_33_70B = "llama-3.3-70b"
-
-    LLAMA_GUARD_4_12B = "meta-llama/llama-guard-4-12b"
-
-
-AllModelEnum: TypeAlias = (
-        OpenAIModelName
-        | DeepseekModelName
-        | GoogleModelName
-        | GroqModelName
-)

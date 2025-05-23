@@ -32,18 +32,18 @@ def train_bmi_ml_model():
     df = pd.read_csv("mcp_bmi/data/bmi.csv")
     df.head()
 
-    Y = df['BMI']
-    X = df.drop(columns='BMI', axis=1)
-    X.head(), Y.head()
+    bmi = df['BMI']
+    feature = df.drop(columns='BMI', axis=1)
+    feature.head(), bmi.head()
 
     model = LinearRegression()
-    model.fit(X, Y)
+    model.fit(feature, bmi)
     return model
 
 
 # Train the model
 logger.info("Training BMI ML model")
-model = train_bmi_ml_model()
+bmi_model = train_bmi_ml_model()
 logger.info("BMI ML model trained")
 # Create FastAPI app
 
@@ -67,7 +67,7 @@ def invoke_bmi_agent(height: str, weight: str):
         height = float(height)
         weight = float(weight)
         X_test = pd.DataFrame({"height": [height], "weight": [weight]})
-        prediction = model.predict(X_test)
+        prediction = bmi_model.predict(X_test)
         return str(prediction[0])
 
     except Exception as e:
@@ -121,4 +121,4 @@ if __name__ == "__main__":
     logger.info("Starting BMI Agent MCP server")
     mcp.settings.port = int(os.getenv("PORT", "1002"))
     mcp.settings.host = "0.0.0.0"
-    mcp.run(transport="sse")
+    mcp.run(transport="streamable-http")

@@ -12,4 +12,4 @@
 # start the gunicorn web server with uvicorn workers
 # --------------------------------------------------------------------------------------------------
 
-/app/.venv/bin/python /app/mcp_bmi/src/main.py
+curl -f http://0.0.0.0:8000/health

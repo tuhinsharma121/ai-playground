@@ -12,7 +12,6 @@ from utils.schema import ChatHistory, ChatMessage
 logger = get_python_logger()
 
 APP_TITLE = "Hello Red Hat"
-USER_ID_COOKIE = "user_id"
 
 
 def get_img_as_base64(file_path):
@@ -27,28 +26,28 @@ def get_image_html(image_path, width=30):
     return f'<img src="data:image/png;base64,{get_img_as_base64(image_path)}" width="{width}">'
 
 
-def get_or_create_user_id() -> str:
+def get_or_create_session_id() -> str:
     """Get the user ID from session state or URL parameters, or create a new one if it doesn't exist."""
-    # Check if user_id exists in session state
-    if USER_ID_COOKIE in st.session_state:
-        return st.session_state[USER_ID_COOKIE]
+    # Check if session_id exists in session state
+    if "session_id" in st.session_state:
+        return st.session_state["session_id"]
 
     # Try to get from URL parameters using the new st.query_params
-    if USER_ID_COOKIE in st.query_params:
-        user_id = st.query_params[USER_ID_COOKIE]
-        st.session_state[USER_ID_COOKIE] = user_id
-        return user_id
+    if "session_id" in st.query_params:
+        session_id = st.query_params["session_id"]
+        st.session_state["session_id"] = session_id
+        return session_id
 
-    # Generate a new user_id if not found
-    user_id = str(uuid.uuid4())
+    # Generate a new session_id if not found
+    session_id = str(uuid.uuid4())
 
     # Store in session state for this session
-    st.session_state[USER_ID_COOKIE] = user_id
+    st.session_state["session_id"] = session_id
 
     # Also add to URL parameters so it can be bookmarked/shared
-    st.query_params[USER_ID_COOKIE] = user_id
+    st.query_params["session_id"] = session_id
 
-    return user_id
+    return session_id
 
 
 async def main() -> None:
@@ -76,7 +75,7 @@ async def main() -> None:
         st.rerun()
 
     # Get or create user ID
-    user_id = get_or_create_user_id()
+    session_id = get_or_create_session_id()
 
     if "agent_client" not in st.session_state:
         try:
@@ -289,7 +288,7 @@ async def main() -> None:
                 stream = agent_client.astream(
                     message=user_input,
                     thread_id=st.session_state.thread_id,
-                    user_id=user_id,
+                    session_id=session_id,
                 )
                 await draw_messages(stream, is_new=True)
             st.rerun()  # Clear stale containers
@@ -321,7 +320,7 @@ async def draw_messages(
     drawing the feedback widget in the latest chat message.
 
     Args:
-        messages_aiter: An async iterator over messages to draw.
+        messages_agen: An async iterator over messages to draw.
         is_new: Whether the messages are new or not.
     """
 

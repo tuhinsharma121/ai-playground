@@ -1,24 +1,31 @@
 import inspect
 import json
-import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Annotated, Any
 from uuid import UUID, uuid4
 
+import psycopg2
 import uvicorn
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from langchain_core.messages import AIMessage, AIMessageChunk, AnyMessage, HumanMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
+from langfuse import Langfuse
+from langfuse.callback import CallbackHandler
 from langgraph.pregel import Pregel
 from langgraph.types import Command, Interrupt
-from langsmith import Client as LangsmithClient
 
-from agent_redhat.src.constants import constants
-from utils.pylogger import get_python_logger
 from agent_redhat.src.agent import get_agent_redhat
+from agent_redhat.src.constants import constants
+from agent_redhat.src.memory import get_postgres_connection_string
+from utils.agent_utils import (
+    convert_message_content_to_string,
+    langchain_to_chat_message,
+    remove_tool_calls,
+)
+from utils.pylogger import get_python_logger
 from utils.schema import (
     ChatHistory,
     ChatHistoryInput,
@@ -27,16 +34,13 @@ from utils.schema import (
     FeedbackResponse,
     StreamInput,
     UserInput, )
-from utils.agent_utils import (
-    convert_message_content_to_string,
-    langchain_to_chat_message,
-    remove_tool_calls,
-)
 
 logger = get_python_logger(constants.LOG_LEVEL)
 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+langfuse_handler = CallbackHandler(trace_name="agent-redhat")
 
-# warnings.filterwarnings("ignore", category=LangChainBetaWarning)
+client = Langfuse()
 
 
 def verify_bearer(
@@ -78,9 +82,10 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     """
     run_id = uuid4()
     thread_id = user_input.thread_id or str(uuid4())
-    user_id = user_input.user_id or str(uuid4())
+    session_id = user_input.session_id or str(uuid4())
 
-    configurable = {"thread_id": thread_id, "model": user_input.model, "user_id": user_id}
+    configurable = {"thread_id": thread_id, "session_id": session_id, "langfuse_session_id": session_id,
+                    "message_id": run_id}
 
     if user_input.agent_config:
         if overlap := configurable.keys() & user_input.agent_config.keys():
@@ -93,6 +98,7 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     config = RunnableConfig(
         configurable=configurable,
         run_id=run_id,
+        callbacks=[langfuse_handler],
     )
 
     # Check for interrupts that need to be resumed
@@ -129,6 +135,7 @@ async def message_generator(
         kwargs, run_id = await _handle_input(user_input, agent)
 
         try:
+            logger.info(f"Running agent with kwargs: {kwargs}")
             # Process streamed events from the graph and yield messages over the SSE stream.
             async for stream_event in agent.astream(
                     **kwargs, stream_mode=["updates", "messages", "custom"]
@@ -136,6 +143,7 @@ async def message_generator(
                 if not isinstance(stream_event, tuple):
                     continue
                 stream_mode, event = stream_event
+                logger.info(f"Stream mode: {stream_mode}, event: {event}")
                 new_messages = []
                 if stream_mode == "updates":
                     for node, updates in event.items():
@@ -248,11 +256,6 @@ def _sse_response_example() -> dict[int | str, Any]:
     }
 
 
-# @router.post(
-#     "/{agent_id}/stream",
-#     response_class=StreamingResponse,
-#     responses=_sse_response_example(),
-# )
 @router.post("/stream", response_class=StreamingResponse, responses=_sse_response_example())
 async def stream(user_input: StreamInput) -> StreamingResponse:
     """
@@ -261,7 +264,7 @@ async def stream(user_input: StreamInput) -> StreamingResponse:
     If agent_id is not provided, the default agent will be used.
     Use thread_id to persist and continue a multi-turn conversation. run_id kwarg
     is also attached to all messages for recording feedback.
-    Use user_id to persist and continue a conversation across multiple threads.
+    Use session_id to persist and continue a conversation across multiple threads.
 
     Set `stream_tokens=false` to return intermediate messages but not token-by-token.
     """
@@ -274,18 +277,20 @@ async def stream(user_input: StreamInput) -> StreamingResponse:
 @router.post("/feedback")
 async def feedback(feedback: Feedback) -> FeedbackResponse:
     """
-    Record feedback for a run to LangSmith.
+    Record feedback for a run to Langfuse.
 
-    This is a simple wrapper for the LangSmith create_feedback API, so the
+    This is a simple wrapper for the Langfuse create_feedback API, so the
     credentials can be stored and managed in the service rather than the client.
     See: https://api.smith.langchain.com/redoc#tag/feedback/operation/create_feedback_api_v1_feedback_post
     """
-    client = LangsmithClient()
+
     kwargs = feedback.kwargs or {}
-    client.create_feedback(
-        run_id=feedback.run_id,
-        key=feedback.key,
-        score=feedback.score,
+
+    # Langfuse uses different parameter names
+    client.score(
+        trace_id=feedback.run_id,  # Assuming run_id maps to trace_id
+        name=feedback.key,  # 'key' becomes 'name' in Langfuse
+        value=feedback.score,  # 'score' becomes 'value' in Langfuse
         **kwargs,
     )
     return FeedbackResponse()
@@ -310,8 +315,6 @@ async def history(input: ChatHistoryInput) -> ChatHistory:
             raise HTTPException(status_code=500, detail="Unexpected error")
 
 
-
-# Then expose this in your API
 @router.get("/threads")
 async def list_threads() -> list[str]:
     """
@@ -319,42 +322,12 @@ async def list_threads() -> list[str]:
     """
     try:
         # Connect to the SQLite database
-        with sqlite3.connect(constants.SQLITE_DB_PATH) as conn:
-            cursor = conn.cursor()
-
-            # First, let's check what tables exist
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            tables = [table[0] for table in cursor.fetchall()]
-
-            logger.info(f"Tables: {tables}")
-
-            if 'checkpoints' not in tables:
-                logger.warning("Checkpoints table not found in SQLite database")
-                return []
-
-            # Examine the schema of the checkpoints table
-            cursor.execute("PRAGMA table_info(checkpoints);")
-            columns = [column[1] for column in cursor.fetchall()]
-
-            logger.info(f"Columns: {columns}")
-
-            # Now query based on the actual schema
-            if 'thread_id' in columns:
-                cursor.execute("SELECT DISTINCT thread_id FROM checkpoints;")
-                keys = [row[0] for row in cursor.fetchall()]
-
-                # Try to extract thread IDs from keys
-                thread_ids = set()
-                for key in keys:
-                    # Assuming the format is typically 'thread_id:...'
-                    parts = key.split(':', 1)
-                    if len(parts) > 0:
-                        thread_ids.add(parts[0])
-
-                return list(thread_ids)
-            else:
-                logger.warning("Could not find key column in checkpoints table")
-                return []
+        with psycopg2.connect(get_postgres_connection_string()) as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT distinct thread_id FROM checkpoints")
+            rows = cur.fetchall()
+            thread_ids = [row[0] for row in rows]
+            return thread_ids
     except Exception as e:
         logger.error(f"An exception occurred: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")

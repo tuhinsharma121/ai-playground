@@ -12,4 +12,4 @@
 # start the gunicorn web server with uvicorn workers
 # --------------------------------------------------------------------------------------------------
 
-/app/.venv/bin/python /app/mcp_bmi/src/main.py
+/app/.venv/bin/python /app/utils/mcp_healthcheck.py --server-url http://0.0.0.0:3002/mcp

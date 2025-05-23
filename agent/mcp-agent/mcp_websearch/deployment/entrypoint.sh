@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env /bin/bash
 
 # --------------------------------------------------------------------------------------------------
 # to make the container alive for indefinite time
