@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated, Any
 from uuid import UUID, uuid4
 
+import psycopg2
 import uvicorn
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -18,6 +19,7 @@ from langgraph.types import Command, Interrupt
 
 from agent_redhat.src.agent import get_agent_redhat
 from agent_redhat.src.constants import constants
+from agent_redhat.src.memory import get_postgres_connection_string
 from utils.agent_utils import (
     convert_message_content_to_string,
     langchain_to_chat_message,
@@ -313,54 +315,6 @@ async def history(input: ChatHistoryInput) -> ChatHistory:
             raise HTTPException(status_code=500, detail="Unexpected error")
 
 
-# Then expose this in your API
-# @router.get("/threads")
-# async def list_threads() -> list[str]:
-#     """
-#     Get a list of all thread IDs in the system.
-#     """
-#     try:
-#         # Connect to the SQLite database
-#         with sqlite3.connect(constants.SQLITE_DB_PATH) as conn:
-#             cursor = conn.cursor()
-#
-#             # First, let's check what tables exist
-#             cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-#             tables = [table[0] for table in cursor.fetchall()]
-#
-#             logger.info(f"Tables: {tables}")
-#
-#             if 'checkpoints' not in tables:
-#                 logger.warning("Checkpoints table not found in SQLite database")
-#                 return []
-#
-#             # Examine the schema of the checkpoints table
-#             cursor.execute("PRAGMA table_info(checkpoints);")
-#             columns = [column[1] for column in cursor.fetchall()]
-#
-#             logger.info(f"Columns: {columns}")
-#
-#             # Now query based on the actual schema
-#             if 'thread_id' in columns:
-#                 cursor.execute("SELECT DISTINCT thread_id FROM checkpoints;")
-#                 keys = [row[0] for row in cursor.fetchall()]
-#
-#                 # Try to extract thread IDs from keys
-#                 thread_ids = set()
-#                 for key in keys:
-#                     # Assuming the format is typically 'thread_id:...'
-#                     parts = key.split(':', 1)
-#                     if len(parts) > 0:
-#                         thread_ids.add(parts[0])
-#
-#                 return list(thread_ids)
-#             else:
-#                 logger.warning("Could not find key column in checkpoints table")
-#                 return []
-#     except Exception as e:
-#         logger.error(f"An exception occurred: {e}")
-#         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
-
 @router.get("/threads")
 async def list_threads() -> list[str]:
     """
@@ -368,8 +322,6 @@ async def list_threads() -> list[str]:
     """
     try:
         # Connect to the SQLite database
-        import psycopg2
-        from agent_redhat.src.memory import get_postgres_connection_string
         with psycopg2.connect(get_postgres_connection_string()) as conn:
             cur = conn.cursor()
             cur.execute("SELECT distinct thread_id FROM checkpoints")

@@ -320,7 +320,7 @@ async def draw_messages(
     drawing the feedback widget in the latest chat message.
 
     Args:
-        messages_aiter: An async iterator over messages to draw.
+        messages_agen: An async iterator over messages to draw.
         is_new: Whether the messages are new or not.
     """
 

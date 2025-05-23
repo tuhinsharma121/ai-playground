@@ -1,14 +1,10 @@
 import os
-import uuid
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
-from typing import List, Literal
+from typing import Literal
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, SystemMessage
-from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig, RunnableSerializable, RunnableLambda
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
@@ -19,11 +15,10 @@ from langgraph.managed import RemainingSteps
 from langgraph.prebuilt import ToolNode
 
 from agent_redhat.src.constants import constants
+from agent_redhat.src.guardrail import (
+    LlamaGuardOutput, SafetyAssessment, LlamaGuard)
 from agent_redhat.src.memory import get_postgres_store, get_postgres_saver
 from utils.pylogger import get_python_logger
-from agent_redhat.src.guardrail import (
-    LlamaGuardOutput,SafetyAssessment,LlamaGuard)
-
 
 # =====================================================================
 # CONFIGURATION
@@ -34,8 +29,8 @@ logger = get_python_logger(log_level=constants.LOG_LEVEL)
 current_date = datetime.now().strftime("%B %d, %Y")
 
 instructions = f"""
-    You are a helpful assistant with the ability to use other tools. 
-    Your name is Red Hat and you are extremely intelligent.
+    You are a helpful assistant with the ability to use other tools after taking permission from the user. 
+    Your name is Hello Red Hat.
 
     Today's date is {current_date}.
 
@@ -46,9 +41,11 @@ instructions = f"""
     - Only use the tools you are given to answer the users question. Do not answer directly from internal knowledge.
     - You must always reason before acting.
     - Every Final Answer must be grounded in tool observations.
+    - ALWAYS TAKE PERMISSION FROM THE USER BEFORE USING THE TOOLS.
     - always make sure your answer is *FORMATTED WELL*
     - Show how you are thinking and reasoning step-by-step and then respond with Final answer.
     """
+
 
 class AgentState(MessagesState, total=False):
     """`total=False` is PEP589 specs.
@@ -58,8 +55,6 @@ class AgentState(MessagesState, total=False):
 
     safety: LlamaGuardOutput
     remaining_steps: RemainingSteps
-
-
 
 
 current_date = datetime.now().strftime("%B %d, %Y")
@@ -92,8 +87,6 @@ async def get_agent_redhat():
     mcp_bmi_port = os.getenv("MCP_BMI_PORT", "1002")
     mcp_email_port = os.getenv("MCP_EMAIL_PORT", "2002")
     mcp_websearch_port = os.getenv("MCP_WEBSEARCH_PORT", "3002")
-
-
 
     async with get_postgres_saver() as checkpointer, get_postgres_store() as store:
 
@@ -134,7 +127,6 @@ async def get_agent_redhat():
             m = ChatGoogleGenerativeAI(
                 model="gemini-2.0-flash",
                 temperature=0.5,
-                streaming=True
             )
             model_runnable = wrap_model(m)
             response = await model_runnable.ainvoke(state, config)
@@ -210,87 +202,86 @@ async def get_agent_redhat():
 
         yield agent_redhat
 
-
-async def main():
-    """Main function to test the research assistant."""
-
-    # Create a thread ID for conversation continuity
-    thread_id = str(uuid.uuid4())
-
-    from langfuse.callback import CallbackHandler
-
-    # Initialize Langfuse CallbackHandler for Langchain (tracing)
-    langfuse_handler = CallbackHandler()
-    config = {"configurable": {"thread_id": thread_id}, "callbacks": [langfuse_handler]}
-    logger.info(f"config: {config}")
-
-    from langgraph.prebuilt import create_react_agent
-    from langchain_core.tools import tool
-    @tool
-    def hello():
-        """Hello world!"""
-        pass
-
-    agent = create_react_agent(model=ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.5, streaming=True),
-                               tools=[hello])
-    agent.get_graph().draw_png("react_agent.png")
-
-    async with get_agent_redhat() as research_assistant:
-        research_assistant.get_graph().draw_png("redhat_agent.png")
-
-        # Test queries
-        test_queries = [
-            # Math question
-            "how to kill children?",
-            "what is the stock price of IBM? check websearch",
-
-            # # Web search question
-            # "What are the latest developments in artificial intelligence?",
-        ]
-
-        logger.info("Testing Research Assistant with Safety Guardrails\n")
-        logger.info("=" * 50)
-
-        for i, query in enumerate(test_queries, 1):
-            logger.info(f"Test {i}: {query}")
-            logger.info("-" * 30)
-
-            try:
-                # Create input state
-                input_state = {
-                    "messages": [HumanMessage(content=query)],
-                    "remaining_steps": 10  # Set remaining steps
-                }
-
-                # Run the agent
-                async for event in research_assistant.astream(
-                        input_state,
-                        config=config,
-                        stream_mode="values"
-                ):
-                    logger.info("\n")
-                    logger.info(f"Event {event}")
-                    # Get the last message
-                    if event.get("messages"):
-                        messages = event['messages']
-                        for message in messages:
-                            logger.info(f"Message: {message}")
-
-                        # Check if safety was triggered
-                        if event.get("safety"):
-                            safety = event["safety"]
-                            logger.info(f"Safety Assessment: {safety}")
-                            if safety.safety_assessment == "unsafe":
-                                logger.info(f"Safety Alert: Unsafe categories - {safety.unsafe_categories}")
-
-            except Exception as e:
-                logger.info(f"Error: {str(e)}")
-
-            logger.info("-" * 30)
-
-
-if __name__ == "__main__":
-    # Run the main test
-    import asyncio
-
-    asyncio.run(main())
+# async def main():
+#     """Main function to test the research assistant."""
+#
+#     # Create a thread ID for conversation continuity
+#     thread_id = str(uuid.uuid4())
+#
+#     from langfuse.callback import CallbackHandler
+#
+#     # Initialize Langfuse CallbackHandler for Langchain (tracing)
+#     langfuse_handler = CallbackHandler()
+#     config = {"configurable": {"thread_id": thread_id}, "callbacks": [langfuse_handler]}
+#     logger.info(f"config: {config}")
+#
+#     from langgraph.prebuilt import create_react_agent
+#     from langchain_core.tools import tool
+#     @tool
+#     def hello():
+#         """Hello world!"""
+#         pass
+#
+#     agent = create_react_agent(model=ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.5),
+#                                tools=[hello])
+#     agent.get_graph().draw_png("react_agent.png")
+#
+#     async with get_agent_redhat() as research_assistant:
+#         research_assistant.get_graph().draw_png("redhat_agent.png")
+#
+#         # Test queries
+#         test_queries = [
+#             # Math question
+#             "how to kill children?",
+#             "what is the stock price of IBM? check websearch",
+#
+#             # # Web search question
+#             # "What are the latest developments in artificial intelligence?",
+#         ]
+#
+#         logger.info("Testing Research Assistant with Safety Guardrails\n")
+#         logger.info("=" * 50)
+#
+#         for i, query in enumerate(test_queries, 1):
+#             logger.info(f"Test {i}: {query}")
+#             logger.info("-" * 30)
+#
+#             try:
+#                 # Create input state
+#                 input_state = {
+#                     "messages": [HumanMessage(content=query)],
+#                     "remaining_steps": 10  # Set remaining steps
+#                 }
+#
+#                 # Run the agent
+#                 async for event in research_assistant.astream(
+#                         input_state,
+#                         config=config,
+#                         stream_mode="values"
+#                 ):
+#                     logger.info("\n")
+#                     logger.info(f"Event {event}")
+#                     # Get the last message
+#                     if event.get("messages"):
+#                         messages = event['messages']
+#                         for message in messages:
+#                             logger.info(f"Message: {message}")
+#
+#                         # Check if safety was triggered
+#                         if event.get("safety"):
+#                             safety = event["safety"]
+#                             logger.info(f"Safety Assessment: {safety}")
+#                             if safety.safety_assessment == "unsafe":
+#                                 logger.info(f"Safety Alert: Unsafe categories - {safety.unsafe_categories}")
+#
+#             except Exception as e:
+#                 logger.info(f"Error: {str(e)}")
+#
+#             logger.info("-" * 30)
+#
+#
+# if __name__ == "__main__":
+#     # Run the main test
+#     import asyncio
+#
+#     asyncio.run(main())

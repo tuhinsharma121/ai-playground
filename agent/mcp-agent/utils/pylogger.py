@@ -45,13 +45,4 @@ def get_uvicorn_log_config(log_format="%(asctime)s.%(msecs)03d %(levelname)s %(m
     return log_config
 
 
-def get_uvicorn_log_config(log_format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
-                           log_date_format="%Y-%m-%d %H:%M:%S"):
-    log_config = uvicorn.config.LOGGING_CONFIG
-    log_config["formatters"]["access"]["fmt"] = log_format
-    log_config["formatters"]["default"]["fmt"] = log_format
-    log_config["formatters"]["access"]["datefmt"] = log_date_format
-    log_config["formatters"]["default"]["datefmt"] = log_date_format
-    return log_config
-
 
