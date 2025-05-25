@@ -26,6 +26,17 @@ from utils.pylogger import get_python_logger
 
 logger = get_python_logger(log_level=constants.LOG_LEVEL)
 
+
+class AgentState(MessagesState, total=False):
+    """`total=False` is PEP589 specs.
+
+    documentation: https://typing.readthedocs.io/en/latest/spec/typeddict.html#totality
+    """
+
+    safety: LlamaGuardOutput
+    remaining_steps: RemainingSteps
+
+
 current_date = datetime.now().strftime("%B %d, %Y")
 
 instructions = f"""
@@ -41,39 +52,107 @@ instructions = f"""
     - Only use the tools you are given to answer the users question. Do not answer directly from internal knowledge.
     - You must always reason before acting.
     - Every Final Answer must be grounded in tool observations.
-    - ALWAYS TAKE PERMISSION FROM THE USER BEFORE USING EVERY TOOL AND ONLY AFTER THE USER AGREES USE THE SPECIFIC TOOL.
+    - ALWAYS TAKE PERMISSION FROM THE USER AND PROVIDE REASONING BEHIND IT BEFORE USING EVERY TOOL 
+    AND ONLY AFTER THE USER AGREES USE THE SPECIFIC TOOL.
     - always make sure your answer is *FORMATTED WELL*
-    """
-
-
-class AgentState(MessagesState, total=False):
-    """`total=False` is PEP589 specs.
-
-    documentation: https://typing.readthedocs.io/en/latest/spec/typeddict.html#totality
-    """
-
-    safety: LlamaGuardOutput
-    remaining_steps: RemainingSteps
-
-
-current_date = datetime.now().strftime("%B %d, %Y")
-instructions = f"""
-    You are a helpful research assistant with the ability to search the web and use other tools.
-    Today's date is {current_date}.
-
-    NOTE: THE USER CAN'T SEE THE TOOL RESPONSE.
-
-    A few things to remember:
-    - Please include markdown-formatted links to any citations used in your response. Only include one
-    or two citations per response unless more are needed. ONLY USE LINKS RETURNED BY THE TOOLS.
-    - Use calculator tool with numexpr to answer math questions. The user does not understand numexpr,
-      so for the final response, use human readable format - e.g. "300 * 200", not "(300 \\times 200)".
     """
 
 
 # =====================================================================
 # RED HAT AGENT
 # =====================================================================
+
+def create_agent(tools):
+    def wrap_model(model: BaseChatModel) -> RunnableSerializable[AgentState, AIMessage]:
+        bound_model = model.bind_tools(tools)
+        preprocessor = RunnableLambda(
+            lambda state: [SystemMessage(content=instructions)] + state["messages"],
+            name="StateModifier",
+        )
+        return preprocessor | bound_model  # type: ignore[return-value]
+
+    def format_safety_message(safety: LlamaGuardOutput) -> AIMessage:
+        content = (
+            f"This conversation was flagged for unsafe content: {', '.join(safety.unsafe_categories)}"
+        )
+        return AIMessage(content=content)
+
+    async def acall_model(state: AgentState, config: RunnableConfig) -> AgentState:
+        m = ChatGoogleGenerativeAI(
+            model="gemini-2.0-flash",
+            temperature=0.5,
+        )
+        model_runnable = wrap_model(m)
+        response = await model_runnable.ainvoke(state, config)
+
+        # Run llama guard check here to avoid returning the message if it's unsafe
+        llama_guard = LlamaGuard()
+        safety_output = await llama_guard.ainvoke("Agent", state["messages"] + [response])
+        if safety_output.safety_assessment == SafetyAssessment.UNSAFE:
+            return {"messages": [format_safety_message(safety_output)], "safety": safety_output}
+
+        if state["remaining_steps"] < 2 and response.tool_calls:
+            return {
+                "messages": [
+                    AIMessage(
+                        id=response.id,
+                        content="Sorry, need more steps to process this request.",
+                    )
+                ]
+            }
+        # We return a list, because this will get added to the existing list
+        return {"messages": [response]}
+
+    async def llama_guard_input(state: AgentState, config: RunnableConfig) -> AgentState:
+        llama_guard = LlamaGuard()
+        safety_output = await llama_guard.ainvoke("User", state["messages"])
+        return {"safety": safety_output, "messages": []}
+
+    async def block_unsafe_content(state: AgentState, config: RunnableConfig) -> AgentState:
+        safety: LlamaGuardOutput = state["safety"]
+        return {"messages": [format_safety_message(safety)]}
+
+    # Define the graph
+    agent = StateGraph(AgentState)
+    agent.add_node("model", acall_model)
+    agent.add_node("tools", ToolNode(tools))
+    agent.add_node("guard_input", llama_guard_input)
+    agent.add_node("block_unsafe_content", block_unsafe_content)
+    agent.set_entry_point("guard_input")
+
+    # Check for unsafe input and block further processing if found
+    def check_safety(state: AgentState) -> Literal["unsafe", "safe"]:
+        safety: LlamaGuardOutput = state["safety"]
+        match safety.safety_assessment:
+            case SafetyAssessment.UNSAFE:
+                return "unsafe"
+            case _:
+                return "safe"
+
+    def pending_tool_calls(state: AgentState) -> Literal["tools", "done"]:
+        last_message = state["messages"][-1]
+        if not isinstance(last_message, AIMessage):
+            raise TypeError(f"Expected AIMessage, got {type(last_message)}")
+        if last_message.tool_calls:
+            return "tools"
+        return "done"
+
+    agent.add_conditional_edges(
+        "guard_input", check_safety, {"unsafe": "block_unsafe_content", "safe": "model"}
+    )
+
+    # Always END after blocking unsafe content
+    agent.add_edge("block_unsafe_content", END)
+
+    # Always run "model" after "tools"
+    agent.add_edge("tools", "model")
+
+    # After "model", if there are tool calls, run "tools". Otherwise END.
+
+    agent.add_conditional_edges("model", pending_tool_calls, {"tools": "tools", "done": END})
+
+    return agent
+
 
 @asynccontextmanager
 async def get_agent_redhat():
@@ -87,114 +166,27 @@ async def get_agent_redhat():
     mcp_email_port = os.getenv("MCP_EMAIL_PORT", "2002")
     mcp_websearch_port = os.getenv("MCP_WEBSEARCH_PORT", "3002")
 
-    async with get_postgres_saver() as checkpointer, get_postgres_store() as store:
-
-        # Initialize MCP client and get tools
-        client = MultiServerMCPClient(
-            {
-                "bmi_agent_tool": {
-                    "url": f"http://{mcp_bmi_host}:{mcp_bmi_port}/mcp",
-                    "transport": "streamable_http"
-                },
-                "websearch_agent_tool": {
-                    "url": f"http://{mcp_websearch_host}:{mcp_websearch_port}/mcp",
-                    "transport": "streamable_http"
-                },
-                "email_agent_tool": {
-                    "url": f"http://{mcp_email_host}:{mcp_email_port}/mcp",
-                    "transport": "streamable_http"
-                }
+    # Initialize MCP client and get tools
+    client = MultiServerMCPClient(
+        {
+            "bmi_agent_tool": {
+                "url": f"http://{mcp_bmi_host}:{mcp_bmi_port}/mcp",
+                "transport": "streamable_http"
+            },
+            "websearch_agent_tool": {
+                "url": f"http://{mcp_websearch_host}:{mcp_websearch_port}/mcp",
+                "transport": "streamable_http"
+            },
+            "email_agent_tool": {
+                "url": f"http://{mcp_email_host}:{mcp_email_port}/mcp",
+                "transport": "streamable_http"
             }
-        )
-        tools = await client.get_tools()
+        }
+    )
+    tools = await client.get_tools()
 
-        def wrap_model(model: BaseChatModel) -> RunnableSerializable[AgentState, AIMessage]:
-            bound_model = model.bind_tools(tools)
-            preprocessor = RunnableLambda(
-                lambda state: [SystemMessage(content=instructions)] + state["messages"],
-                name="StateModifier",
-            )
-            return preprocessor | bound_model  # type: ignore[return-value]
-
-        def format_safety_message(safety: LlamaGuardOutput) -> AIMessage:
-            content = (
-                f"This conversation was flagged for unsafe content: {', '.join(safety.unsafe_categories)}"
-            )
-            return AIMessage(content=content)
-
-        async def acall_model(state: AgentState, config: RunnableConfig) -> AgentState:
-            m = ChatGoogleGenerativeAI(
-                model="gemini-2.0-flash",
-                temperature=0.5,
-            )
-            model_runnable = wrap_model(m)
-            response = await model_runnable.ainvoke(state, config)
-
-            # Run llama guard check here to avoid returning the message if it's unsafe
-            llama_guard = LlamaGuard()
-            safety_output = await llama_guard.ainvoke("Agent", state["messages"] + [response])
-            if safety_output.safety_assessment == SafetyAssessment.UNSAFE:
-                return {"messages": [format_safety_message(safety_output)], "safety": safety_output}
-
-            if state["remaining_steps"] < 2 and response.tool_calls:
-                return {
-                    "messages": [
-                        AIMessage(
-                            id=response.id,
-                            content="Sorry, need more steps to process this request.",
-                        )
-                    ]
-                }
-            # We return a list, because this will get added to the existing list
-            return {"messages": [response]}
-
-        async def llama_guard_input(state: AgentState, config: RunnableConfig) -> AgentState:
-            llama_guard = LlamaGuard()
-            safety_output = await llama_guard.ainvoke("User", state["messages"])
-            return {"safety": safety_output, "messages": []}
-
-        async def block_unsafe_content(state: AgentState, config: RunnableConfig) -> AgentState:
-            safety: LlamaGuardOutput = state["safety"]
-            return {"messages": [format_safety_message(safety)]}
-
-        # Define the graph
-        agent = StateGraph(AgentState)
-        agent.add_node("model", acall_model)
-        agent.add_node("tools", ToolNode(tools))
-        agent.add_node("guard_input", llama_guard_input)
-        agent.add_node("block_unsafe_content", block_unsafe_content)
-        agent.set_entry_point("guard_input")
-
-        # Check for unsafe input and block further processing if found
-        def check_safety(state: AgentState) -> Literal["unsafe", "safe"]:
-            safety: LlamaGuardOutput = state["safety"]
-            match safety.safety_assessment:
-                case SafetyAssessment.UNSAFE:
-                    return "unsafe"
-                case _:
-                    return "safe"
-
-        def pending_tool_calls(state: AgentState) -> Literal["tools", "done"]:
-            last_message = state["messages"][-1]
-            if not isinstance(last_message, AIMessage):
-                raise TypeError(f"Expected AIMessage, got {type(last_message)}")
-            if last_message.tool_calls:
-                return "tools"
-            return "done"
-
-        agent.add_conditional_edges(
-            "guard_input", check_safety, {"unsafe": "block_unsafe_content", "safe": "model"}
-        )
-
-        # Always END after blocking unsafe content
-        agent.add_edge("block_unsafe_content", END)
-
-        # Always run "model" after "tools"
-        agent.add_edge("tools", "model")
-
-        # After "model", if there are tool calls, run "tools". Otherwise END.
-
-        agent.add_conditional_edges("model", pending_tool_calls, {"tools": "tools", "done": END})
+    async with get_postgres_saver() as checkpointer, get_postgres_store() as store:
+        agent = create_agent(tools=tools)
 
         # Compile the graph with checkpointer and store
         agent_redhat = agent.compile(checkpointer=checkpointer, store=store)

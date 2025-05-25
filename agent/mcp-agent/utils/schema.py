@@ -5,18 +5,6 @@ from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
 
-# class AgentInfo(BaseModel):
-#     """Info about an available agent."""
-#
-#     key: str = Field(
-#         description="Agent key.",
-#         examples=["research-assistant"],
-#     )
-#     description: str = Field(
-#         description="Description of the agent.",
-#         examples=["A research assistant for generating research papers."],
-#     )
-
 
 class UserInput(BaseModel):
     """Basic user input for the agent."""
