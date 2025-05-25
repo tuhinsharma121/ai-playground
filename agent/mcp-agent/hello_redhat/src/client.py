@@ -77,6 +77,7 @@ class AgentClient:
             message: str,
             thread_id: str | None = None,
             session_id: str | None = None,
+            user_id: str | None = None,
             agent_config: dict[str, Any] | None = None,
             stream_tokens: bool = True,
     ) -> AsyncGenerator[ChatMessage | str, None]:
@@ -107,6 +108,8 @@ class AgentClient:
             request.agent_config = agent_config
         if session_id:
             request.session_id = session_id
+        if user_id:
+            request.user_id = user_id
         async with httpx.AsyncClient() as client:
             try:
                 async with client.stream(
@@ -171,11 +174,11 @@ class AgentClient:
 
         return ChatHistory.model_validate(response.json())
 
-    def get_all_thread_ids(self) -> list[str]:
+    def get_all_thread_ids(self,user_id: str) -> list[str]:
 
         try:
             response = httpx.get(
-                f"{self.base_url}/threads",
+                f"{self.base_url}/threads/{user_id}",
                 headers=self._headers,
                 timeout=self.timeout,
             )

@@ -27,7 +27,7 @@ def get_image_html(image_path, width=30):
 
 
 def get_or_create_session_id() -> str:
-    """Get the user ID from session state or URL parameters, or create a new one if it doesn't exist."""
+    """Get the session ID from session state or URL parameters, or create a new one if it doesn't exist."""
     # Check if session_id exists in session state
     if "session_id" in st.session_state:
         return st.session_state["session_id"]
@@ -48,6 +48,36 @@ def get_or_create_session_id() -> str:
     st.query_params["session_id"] = session_id
 
     return session_id
+
+
+def get_or_create_user_id() -> str:
+    """Get the user ID from session state or URL parameters, or create a new one if it doesn't exist."""
+    # Check if user_id exists in session state
+    if "user_id" in st.session_state:
+        return st.session_state["user_id"]
+
+    # Try to get from URL parameters using the new st.query_params
+    if "user_id" in st.query_params:
+        user_id = st.query_params["user_id"]
+        st.session_state["user_id"] = user_id
+        return user_id
+
+    # Generate a new session_id if not found
+
+    user_id_dict = {
+        "tuhin": "password",
+        "shoubhik": "password",
+    }
+
+    user_id = "tuhin"
+
+    # Store in session state for this session
+    st.session_state["user_id"] = user_id
+
+    # Also add to URL parameters so it can be bookmarked/shared
+    st.query_params["user_id"] = user_id
+
+    return user_id
 
 
 async def main() -> None:
@@ -74,8 +104,10 @@ async def main() -> None:
         await asyncio.sleep(0.1)
         st.rerun()
 
-    # Get or create user ID
+    # Get or create Session ID
     session_id = get_or_create_session_id()
+    # Get or create User ID
+    user_id = get_or_create_user_id()
 
     if "agent_client" not in st.session_state:
         try:
@@ -183,7 +215,7 @@ async def main() -> None:
         # Get all thread IDs from the backend
         try:
             # Fetch all thread IDs
-            all_thread_ids = agent_client.get_all_thread_ids()
+            all_thread_ids = agent_client.get_all_thread_ids(user_id=user_id)
 
             # If this is the first load and there are threads, fetch the first message for each thread
             # to generate proper titles (only for threads not in our cache)
@@ -288,6 +320,7 @@ async def main() -> None:
                 stream = agent_client.astream(
                     message=user_input,
                     thread_id=st.session_state.thread_id,
+                    user_id=user_id,
                     session_id=session_id,
                 )
                 await draw_messages(stream, is_new=True)

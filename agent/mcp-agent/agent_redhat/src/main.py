@@ -82,9 +82,15 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     run_id = uuid4()
     thread_id = user_input.thread_id or str(uuid4())
     session_id = user_input.session_id or str(uuid4())
+    user_id = user_input.user_id
 
-    configurable = {"thread_id": thread_id, "session_id": session_id, "langfuse_session_id": session_id,
-                    "message_id": run_id}
+    configurable = {"thread_id": thread_id,
+                    "session_id": session_id,
+                    "message_id": run_id,
+                    "user_id": user_id,
+                    "langfuse_session_id": session_id,
+                    "langfuse_user_id": user_id,
+                    "langfuse_observation_id": thread_id}
 
     if user_input.agent_config:
         if overlap := configurable.keys() & user_input.agent_config.keys():
@@ -314,8 +320,8 @@ async def history(input: ChatHistoryInput) -> ChatHistory:
             raise HTTPException(status_code=500, detail="Unexpected error")
 
 
-@router.get("/threads")
-async def list_threads() -> list[str]:
+@router.get("/threads/{user_id}")
+async def list_threads(user_id: str) -> list[str]:
     """
     Get a list of all thread IDs in the system.
     """
@@ -323,7 +329,7 @@ async def list_threads() -> list[str]:
         # Connect to the SQLite database
         with psycopg2.connect(get_postgres_connection_string()) as conn:
             cur = conn.cursor()
-            cur.execute("SELECT distinct thread_id FROM checkpoints")
+            cur.execute(f"SELECT distinct thread_id FROM checkpoints where metadata->>'user_id'='{user_id}'")
             rows = cur.fetchall()
             thread_ids = [row[0] for row in rows]
             return thread_ids
