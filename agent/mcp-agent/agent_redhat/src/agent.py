@@ -14,10 +14,10 @@ from langgraph.graph import StateGraph
 from langgraph.managed import RemainingSteps
 from langgraph.prebuilt import ToolNode
 
-from agent_redhat.src.constants import constants
-from agent_redhat.src.guardrail import (
+from utils.constants import constants
+from utils.guardrail import (
     LlamaGuardOutput, SafetyAssessment, LlamaGuard)
-from agent_redhat.src.memory import get_postgres_store, get_postgres_saver
+from utils.memory import get_postgres_store, get_postgres_saver
 from utils.pylogger import get_python_logger
 
 # =====================================================================
@@ -41,9 +41,8 @@ instructions = f"""
     - Only use the tools you are given to answer the users question. Do not answer directly from internal knowledge.
     - You must always reason before acting.
     - Every Final Answer must be grounded in tool observations.
-    - ALWAYS TAKE PERMISSION FROM THE USER BEFORE USING THE TOOLS.
+    - ALWAYS TAKE PERMISSION FROM THE USER BEFORE USING EVERY TOOL AND ONLY AFTER THE USER AGREES USE THE SPECIFIC TOOL.
     - always make sure your answer is *FORMATTED WELL*
-    - Show how you are thinking and reasoning step-by-step and then respond with Final answer.
     """
 
 

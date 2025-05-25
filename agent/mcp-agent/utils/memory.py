@@ -3,7 +3,7 @@ from contextlib import AbstractAsyncContextManager
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.store.postgres import AsyncPostgresStore
 
-from agent_redhat.src.constants import constants
+from utils.constants import constants
 from utils.pylogger import get_python_logger
 
 logger = get_python_logger(log_level=constants.LOG_LEVEL)

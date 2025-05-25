@@ -1,20 +1,21 @@
-from typing import Any, Literal, NotRequired
+from typing import Any, Literal
+from typing import NotRequired
 
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
 
-class AgentInfo(BaseModel):
-    """Info about an available agent."""
-
-    key: str = Field(
-        description="Agent key.",
-        examples=["research-assistant"],
-    )
-    description: str = Field(
-        description="Description of the agent.",
-        examples=["A research assistant for generating research papers."],
-    )
+# class AgentInfo(BaseModel):
+#     """Info about an available agent."""
+#
+#     key: str = Field(
+#         description="Agent key.",
+#         examples=["research-assistant"],
+#     )
+#     description: str = Field(
+#         description="Description of the agent.",
+#         examples=["A research assistant for generating research papers."],
+#     )
 
 
 class UserInput(BaseModel):
@@ -149,11 +150,6 @@ class ChatHistory(BaseModel):
     messages: list[ChatMessage]
 
 
-from typing import Any, Literal
-
-from pydantic import BaseModel, Field
-
-
 class TaskData(BaseModel):
     name: str | None = Field(
         description="Name of the task.", default=None, examples=["Check input safety"]
@@ -223,4 +219,3 @@ class TaskDataStatus:
         else:
             state = "running"
         status.update(state=state)  # type: ignore[arg-type]
-

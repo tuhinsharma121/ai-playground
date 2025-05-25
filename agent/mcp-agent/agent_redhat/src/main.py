@@ -18,13 +18,13 @@ from langgraph.pregel import Pregel
 from langgraph.types import Command, Interrupt
 
 from agent_redhat.src.agent import get_agent_redhat
-from agent_redhat.src.constants import constants
-from agent_redhat.src.memory import get_postgres_connection_string
 from utils.agent_utils import (
     convert_message_content_to_string,
     langchain_to_chat_message,
     remove_tool_calls,
 )
+from utils.constants import constants
+from utils.memory import get_postgres_connection_string
 from utils.pylogger import get_python_logger
 from utils.schema import (
     ChatHistory,
@@ -34,13 +34,6 @@ from utils.schema import (
     FeedbackResponse,
     StreamInput,
     UserInput, )
-
-logger = get_python_logger(constants.LOG_LEVEL)
-
-# Initialize Langfuse CallbackHandler for Langchain (tracing)
-langfuse_handler = CallbackHandler(trace_name="agent-redhat")
-
-client = Langfuse()
 
 
 def verify_bearer(
@@ -67,11 +60,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         async with get_agent_redhat() as agent:
             yield
     except Exception as e:
-        logger.error(f"Error during database/store initialization: {e}")
+        app.logger.error(f"Error during database/store initialization: {e}")
         raise
 
 
 app = FastAPI(lifespan=lifespan)
+app.logger = get_python_logger(constants.LOG_LEVEL)
+
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
+app.langfuse_handler = CallbackHandler(trace_name="agent-redhat", environment=constants.LANGFUSE_TRACING_ENVIRONMENT)
+
+app.client = Langfuse(environment=constants.LANGFUSE_TRACING_ENVIRONMENT)
 router = APIRouter(dependencies=[Depends(verify_bearer)])
 
 
@@ -98,7 +97,7 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     config = RunnableConfig(
         configurable=configurable,
         run_id=run_id,
-        callbacks=[langfuse_handler],
+        callbacks=[app.langfuse_handler],
     )
 
     # Check for interrupts that need to be resumed
@@ -135,7 +134,7 @@ async def message_generator(
         kwargs, run_id = await _handle_input(user_input, agent)
 
         try:
-            logger.info(f"Running agent with kwargs: {kwargs}")
+            app.logger.info(f"Running agent with kwargs: {kwargs}")
             # Process streamed events from the graph and yield messages over the SSE stream.
             async for stream_event in agent.astream(
                     **kwargs, stream_mode=["updates", "messages", "custom"]
@@ -143,7 +142,7 @@ async def message_generator(
                 if not isinstance(stream_event, tuple):
                     continue
                 stream_mode, event = stream_event
-                logger.info(f"Stream mode: {stream_mode}, event: {event}")
+                app.logger.info(f"Stream mode: {stream_mode}, event: {event}")
                 new_messages = []
                 if stream_mode == "updates":
                     for node, updates in event.items():
@@ -204,7 +203,7 @@ async def message_generator(
                         chat_message = langchain_to_chat_message(message)
                         chat_message.run_id = str(run_id)
                     except Exception as e:
-                        logger.error(f"Error parsing message: {e}")
+                        app.logger.error(f"Error parsing message: {e}")
                         yield f"data: {json.dumps({'type': 'error', 'content': 'Unexpected error'})}\n\n"
                         continue
                     # LangGraph re-sends the input message, which feels weird, so drop it
@@ -229,7 +228,7 @@ async def message_generator(
                         # So we only print non-empty content.
                         yield f"data: {json.dumps({'type': 'token', 'content': convert_message_content_to_string(content)})}\n\n"
         except Exception as e:
-            logger.error(f"Error in message generator: {e}")
+            app.logger.error(f"Error in message generator: {e}")
             yield f"data: {json.dumps({'type': 'error', 'content': 'Internal server error'})}\n\n"
         finally:
             yield "data: [DONE]\n\n"
@@ -287,7 +286,7 @@ async def feedback(feedback: Feedback) -> FeedbackResponse:
     kwargs = feedback.kwargs or {}
 
     # Langfuse uses different parameter names
-    client.score(
+    app.client.score(
         trace_id=feedback.run_id,  # Assuming run_id maps to trace_id
         name=feedback.key,  # 'key' becomes 'name' in Langfuse
         value=feedback.score,  # 'score' becomes 'value' in Langfuse
@@ -311,7 +310,7 @@ async def history(input: ChatHistoryInput) -> ChatHistory:
             chat_messages: list[ChatMessage] = [langchain_to_chat_message(m) for m in messages]
             return ChatHistory(messages=chat_messages)
         except Exception as e:
-            logger.error(f"An exception occurred: {e}")
+            app.logger.error(f"An exception occurred: {e}")
             raise HTTPException(status_code=500, detail="Unexpected error")
 
 
@@ -329,7 +328,7 @@ async def list_threads() -> list[str]:
             thread_ids = [row[0] for row in rows]
             return thread_ids
     except Exception as e:
-        logger.error(f"An exception occurred: {e}")
+        app.logger.error(f"An exception occurred: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
@@ -342,4 +341,4 @@ async def health_check():
 app.include_router(router)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, )
+    uvicorn.run(app, host="0.0.0.0", port=8000)

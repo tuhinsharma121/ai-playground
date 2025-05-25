@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings
 
 
 class Constants(BaseSettings):
-    LOG_LEVEL: str | None = "INFO"
+    LOG_LEVEL: str | None = os.getenv("PYTHON_LOG_LEVEL", "INFO")
     AUTH_SECRET: SecretStr | None = None
     OPENAI_API_KEY: SecretStr | None = None
     DEEPSEEK_API_KEY: SecretStr | None = None
@@ -21,6 +21,9 @@ class Constants(BaseSettings):
     POSTGRES_HOST: str | None = os.getenv("POSTGRES_HOST", "0.0.0.0")
     POSTGRES_PORT: int | None = int(os.getenv("POSTGRES_PORT", "5432"))
     POSTGRES_DB: str | None = os.getenv("POSTGRES_DB", None)
+
+    # Langfuse
+    LANGFUSE_TRACING_ENVIRONMENT: str | None = os.getenv("LANGFUSE_TRACING_ENVIRONMENT", "production")
 
 
 constants = Constants()

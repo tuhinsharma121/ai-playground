@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from utils.pylogger import get_python_logger
 
-from constants import constants
+from utils.constants import constants
 
 logger = get_python_logger(log_level=constants.LOG_LEVEL)
 

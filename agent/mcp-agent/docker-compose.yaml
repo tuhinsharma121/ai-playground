@@ -109,6 +109,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-postgres}
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
+      - LANGFUSE_TRACING_ENVIRONMENT=${LANGFUSE_TRACING_ENVIRONMENT}
       - MCP_WEBSEARCH_HOST=mcp_websearch
       - MCP_EMAIL_HOST=mcp_email
       - MCP_BMI_HOST=mcp_bmi
