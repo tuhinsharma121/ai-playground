@@ -1,148 +1,135 @@
 services:
-  mcp_bmi:
+  app_bmi:
     build:
       context: "."
-      dockerfile: mcp_bmi/deployment/Dockerfile
-    image: mcp_bmi:latest
-    container_name: "mcp_bmi"
+      dockerfile: app_bmi/deployment/agent/Dockerfile
+    image: app_bmi:latest
+    container_name: "app_bmi"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
     environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PORT=1001
+    ports:
+      - "1001:1001"
+  mcp_tool_bmi:
+    build:
+      context: "."
+      dockerfile: app_bmi/deployment/mcp/Dockerfile
+    image: mcp_tool_bmi:latest
+    container_name: "mcp_tool_bmi"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - AGENT_HOST=app_bmi
+      - AGENT_PORT=1001
       - PORT=1002
     ports:
       - "1002:1002"
-    healthcheck:
-      test: [ "CMD", "/bin/healthcheck.sh"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-  mcp_email:
+  app_email:
     build:
       context: "."
-      dockerfile: mcp_email/deployment/Dockerfile
-    image: mcp_email:latest
-    container_name: "mcp_email"
+      dockerfile: app_email/deployment/agent/Dockerfile
+    image: app_email:latest
+    container_name: "app_email"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
     environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - RESEND_API_KEY=${RESEND_API_KEY}
       - RESEND_EMAIL_ID=${RESEND_EMAIL_ID}
-      - PORT=2002
+      - PORT=3001
     ports:
-      - "2002:2002"
-    healthcheck:
-      test: [ "CMD", "/bin/healthcheck.sh"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-  mcp_websearch:
+      - "3001:3001"
+  mcp_tool_email:
     build:
       context: "."
-      dockerfile: mcp_websearch/deployment/Dockerfile
-    image: mcp_websearch:latest
-    container_name: "mcp_websearch"
+      dockerfile: app_email/deployment/mcp/Dockerfile
+    image: mcp_tool_email:latest
+    container_name: "mcp_tool_email"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
     environment:
-      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - AGENT_HOST=app_email
+      - AGENT_PORT=3001
       - PORT=3002
     ports:
       - "3002:3002"
-    healthcheck:
-      test: [ "CMD", "/bin/healthcheck.sh"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-  postgres:
-    image: postgres:16
-    container_name: "postgres"
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-postgres}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - dataverse_ai_nw
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-  agent_redhat:
+  app_websearch:
     build:
       context: "."
-      dockerfile: agent_redhat/deployment/Dockerfile
-    image: agent_redhat:latest
-    container_name: "agent_redhat"
+      dockerfile: app_websearch/deployment/agent/Dockerfile
+    image: app_websearch:latest
+    container_name: "app_websearch"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
-    depends_on:
-      postgres:
-        condition: service_healthy
-      mcp_bmi:
-        condition: service_healthy
-      mcp_email:
-        condition: service_healthy
-      mcp_websearch:
-        condition: service_healthy
     environment:
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
-      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
-      - LANGFUSE_HOST=${LANGFUSE_HOST}
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-postgres}
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - MCP_WEBSEARCH_HOST=mcp_websearch
-      - MCP_EMAIL_HOST=mcp_email
-      - MCP_BMI_HOST=mcp_bmi
-      - MCP_BMI_PORT=1002
-      - MCP_EMAIL_PORT=2002
-      - MCP_WEBSEARCH_PORT=3002
-      - PORT=8000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - PORT=5001
     ports:
-      - "8000:8000"
-    healthcheck:
-      test: [ "CMD", "/bin/healthcheck.sh"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "5001:5001"
+  mcp_tool_websearch:
+    build:
+      context: "."
+      dockerfile: app_websearch/deployment/mcp/Dockerfile
+    image: mcp_tool_websearch:latest
+    container_name: "mcp_tool_websearch"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - AGENT_HOST=app_websearch
+      - AGENT_PORT=5001
+      - PORT=5002
+    ports:
+      - "5002:5002"
   hello_redhat:
     build:
       context: "."
-      dockerfile: hello_redhat/deployment/Dockerfile
+      dockerfile: hello_redhat/deployment/agent/Dockerfile
     image: hello_redhat:latest
     container_name: "hello_redhat"
     entrypoint:
       - /bin/entrypoint.sh
     networks:
       - dataverse_ai_nw
-    depends_on:
-      agent_redhat:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "/bin/healthcheck.sh"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     environment:
-      - AGENT_HOST=agent_redhat
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - MCP_WEBSEARCH_HOST=mcp_tool_websearch
+      - MCP_EMAIL_HOST=mcp_tool_email
+      - MCP_BMI_HOST=mcp_tool_bmi
+      - MCP_BMI_PORT=1002
+      - MCP_EMAIL_PORT=3002
+      - MCP_WEBSEARCH_PORT=5002
+      - PORT=8000
+    ports:
+      - "8000:8000"
+  hello_redhat_ui:
+    build:
+      context: "."
+      dockerfile: hello_redhat/deployment/ui/Dockerfile
+    image: hello_redhat_ui:latest
+    container_name: "hello_redhat_ui"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - AGENT_HOST=hello_redhat
       - AGENT_PORT=8000
       - PORT=8501
       - STREAMLIT_SERVER_HEADLESS=true
@@ -151,5 +138,3 @@ services:
       - "8501:8501"
 networks:
   dataverse_ai_nw: { }
-volumes:
-  postgres_data:

@@ -1,0 +1,151 @@
+services:
+  mcp_bmi:
+    build:
+      context: "."
+      dockerfile: mcp_bmi/deployment/Dockerfile
+    image: mcp_bmi:latest
+    container_name: "mcp_bmi"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - PORT=1002
+    env_file:
+      - .env
+    ports:
+      - "1002:1002"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  mcp_email:
+    build:
+      context: "."
+      dockerfile: mcp_email/deployment/Dockerfile
+    image: mcp_email:latest
+    container_name: "mcp_email"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - PORT=2002
+    env_file:
+      - .env
+    ports:
+      - "2002:2002"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  mcp_websearch:
+    build:
+      context: "."
+      dockerfile: mcp_websearch/deployment/Dockerfile
+    image: mcp_websearch:latest
+    container_name: "mcp_websearch"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    environment:
+      - PORT=3002
+    env_file:
+      - .env
+    ports:
+      - "3002:3002"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  postgres:
+    image: postgres:16
+    container_name: "postgres"
+    ports:
+      - "5460:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - dataverse_ai_nw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  agent_redhat:
+    build:
+      context: "."
+      dockerfile: agent_redhat/deployment/Dockerfile
+    image: agent_redhat:latest
+    container_name: "agent_redhat"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mcp_bmi:
+        condition: service_healthy
+      mcp_email:
+        condition: service_healthy
+      mcp_websearch:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - MCP_WEBSEARCH_HOST=mcp_websearch
+      - MCP_WEBSEARCH_PORT=3002
+      - MCP_EMAIL_HOST=mcp_email
+      - MCP_EMAIL_PORT=2002
+      - MCP_BMI_HOST=mcp_bmi
+      - MCP_BMI_PORT=1002
+      - PORT=8000
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  hello_redhat:
+    build:
+      context: "."
+      dockerfile: hello_redhat/deployment/Dockerfile
+    image: hello_redhat:latest
+    container_name: "hello_redhat"
+    entrypoint:
+      - /bin/entrypoint.sh
+    networks:
+      - dataverse_ai_nw
+    depends_on:
+      agent_redhat:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "/bin/healthcheck.sh"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - AGENT_HOST=agent_redhat
+      - AGENT_PORT=8000
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
+      - PORT=8501
+    env_file:
+      - .env
+    ports:
+      - "8501:8501"
+networks:
+  dataverse_ai_nw: { }
+volumes:
+  postgres_data:
