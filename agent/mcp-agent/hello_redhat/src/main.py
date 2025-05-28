@@ -9,6 +9,104 @@ from hello_redhat.src.client import AgentClient, AgentClientError
 from utils.pylogger import get_python_logger
 from utils.schema import ChatHistory, ChatMessage
 
+
+
+
+# Add these new functions after your existing utility functions
+
+def show_login_screen():
+    """Display the login screen and handle authentication"""
+    st.set_page_config(
+        page_title=f"{APP_TITLE} - Login",
+        menu_items={},
+    )
+
+    # Hide the streamlit upper-right chrome
+    st.html(
+        """
+        <style>
+        [data-testid="stStatusWidget"] {
+                visibility: hidden;
+                height: 0%;
+                position: fixed;
+            }
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        </style>
+        """,
+    )
+
+    # Center the login form
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col2:
+        # st.markdown('<div class="login-container">', unsafe_allow_html=True)
+
+        try:
+            icon_path = "hello_redhat/images/redhat.png"
+            st.markdown(f'<div style="text-align: center;">{get_image_html(icon_path, width=150)}</div>',
+                        unsafe_allow_html=True)
+        except:
+            st.markdown('<div style="text-align: center;">🔴</div>', unsafe_allow_html=True)
+
+        st.markdown(f"<h1 style='text-align: center;'>{APP_TITLE}</h1>", unsafe_allow_html=True)
+
+        # Login form
+        with st.form("login_form"):
+            username = st.text_input("Username", placeholder="Enter your username")
+            password = st.text_input("Password", type="password", placeholder="Enter your password")
+            login_button = st.form_submit_button("Login", use_container_width=True)
+
+            if login_button:
+                if authenticate_user(username, password):
+                    st.session_state["authenticated"] = True
+                    st.session_state["username"] = username
+                    st.success("Login successful!")
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password")
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+
+def authenticate_user(username: str, password: str) -> bool:
+    """Authenticate user credentials"""
+    return username
+
+
+def logout():
+    """Clear authentication and session data"""
+    keys_to_clear = [
+        "authenticated", "username", "session_id", "user_id",
+        "agent_client", "thread_id", "messages", "chat_history",
+        "last_message", "last_feedback", "first_load"
+    ]
+    for key in keys_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+    st.rerun()
+
+
+# MODIFY your existing get_or_create_user_id() function to this:
+
+def get_or_create_user_id() -> str:
+    """Get the user ID from session state - now based on authenticated user"""
+    # Use the authenticated username as user_id
+    if "username" in st.session_state:
+        user_id = st.session_state["username"]
+        st.session_state["user_id"] = user_id
+        # st.query_params["user_id"] = user_id
+        return user_id
+
+    # Fallback
+    return "anonymous"
+
 logger = get_python_logger()
 
 APP_TITLE = "Hello Red Hat"
@@ -33,10 +131,10 @@ def get_or_create_session_id() -> str:
         return st.session_state["session_id"]
 
     # Try to get from URL parameters using the new st.query_params
-    if "session_id" in st.query_params:
-        session_id = st.query_params["session_id"]
-        st.session_state["session_id"] = session_id
-        return session_id
+    # if "session_id" in st.query_params:
+    #     session_id = st.query_params["session_id"]
+    #     st.session_state["session_id"] = session_id
+    #     return session_id
 
     # Generate a new session_id if not found
     session_id = str(uuid.uuid4())
@@ -45,42 +143,30 @@ def get_or_create_session_id() -> str:
     st.session_state["session_id"] = session_id
 
     # Also add to URL parameters so it can be bookmarked/shared
-    st.query_params["session_id"] = session_id
+    # st.query_params["session_id"] = session_id
 
     return session_id
 
 
-def get_or_create_user_id() -> str:
-    """Get the user ID from session state or URL parameters, or create a new one if it doesn't exist."""
-    # Check if user_id exists in session state
-    if "user_id" in st.session_state:
-        return st.session_state["user_id"]
-
-    # Try to get from URL parameters using the new st.query_params
-    if "user_id" in st.query_params:
-        user_id = st.query_params["user_id"]
-        st.session_state["user_id"] = user_id
-        return user_id
-
-    # Generate a new session_id if not found
-
-    user_id_dict = {
-        "tuhin": "password",
-        "shoubhik": "password",
-    }
-
-    user_id = "tuhin"
-
-    # Store in session state for this session
-    st.session_state["user_id"] = user_id
-
-    # Also add to URL parameters so it can be bookmarked/shared
-    st.query_params["user_id"] = user_id
-
-    return user_id
+# def get_or_create_user_id() -> str:
+#     """Get the user ID from session state or URL parameters, or create a new one if it doesn't exist."""
+#     # Check if user_id exists in session state
+#     if "user_id" in st.session_state:
+#         return st.session_state["user_id"]
+#
+#     # Try to get from URL parameters using the new st.query_params
+#     if "user_id" in st.query_params:
+#         user_id = st.query_params["user_id"]
+#         st.session_state["user_id"] = user_id
+#         return user_id
 
 
 async def main() -> None:
+    # Add this check at the very start of main()
+    if not st.session_state.get("authenticated", False):
+        show_login_screen()
+        return
+
     st.set_page_config(
         page_title=APP_TITLE,
         # page_icon=APP_ICON,
@@ -179,7 +265,7 @@ async def main() -> None:
         st.markdown(
             """
             <p style="text-align: center;">
-            I am AI Assistant. Ask me anything!
+            I am an AI Assistant. Ask me anything!
             </p>
             """,
             unsafe_allow_html=True
@@ -189,6 +275,10 @@ async def main() -> None:
             st.session_state.messages = []
             st.session_state.thread_id = str(uuid.uuid4())
             st.rerun()
+
+        # Add this in your sidebar, after the "New Chat" button
+        if st.button("🚪 Logout", use_container_width=True):
+            logout()
 
         # Display chat history in sidebar
         st.subheader("Chat History")
@@ -457,6 +547,7 @@ async def draw_messages(
 
 async def handle_feedback() -> None:
     """Draws a feedback widget and records feedback from the user."""
+
 
     # Keep track of last feedback sent to avoid sending duplicates
     if "last_feedback" not in st.session_state:

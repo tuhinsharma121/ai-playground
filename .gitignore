@@ -10,3 +10,4 @@ results*
 .idea/
 Untitled.ipynb
 __pycache__
+.env

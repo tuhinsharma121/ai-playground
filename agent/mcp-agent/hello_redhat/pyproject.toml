@@ -21,7 +21,8 @@ dependencies = [
     "fastapi ~=0.115.5",
     "resend==2.8.0",
     "langchain-mcp-adapters==0.1.0",
-    "streamlit ~=1.45.1"
+    "streamlit ~=1.45.1",
+    "streamlit-authenticator==0.4.2"
 ]
 
 [project.optional-dependencies]
