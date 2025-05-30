@@ -29,7 +29,7 @@ def train_bmi_ml_model():
     """
 
     # Data is downloaded from https://www.kaggle.com/datasets/rukenmissonnier/age-weight-height-bmi-analysis
-    df = pd.read_csv("mcp_bmi/data/bmi.csv")
+    df = pd.read_csv("mcp_bmi/data1/bmi.csv")
     df.head()
 
     bmi = df['BMI']
