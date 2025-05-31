@@ -74,13 +74,10 @@ services:
       - dataverse_ai_nw
     environment:
       - PORT=4002
-      - CALLBACK_URL=http://localhost:37657/auth/callback
-      - REDIRECT_URI=http://localhost:37657/auth/callback
     env_file:
       - .env
     ports:
       - "4002:4002"
-      - "37657:37657"
   postgres:
     image: postgres:16
     container_name: "postgres"
