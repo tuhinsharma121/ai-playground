@@ -28,5 +28,10 @@ class Constants(BaseSettings):
     # Langfuse
     LANGFUSE_TRACING_ENVIRONMENT: str | None = os.getenv("LANGFUSE_TRACING_ENVIRONMENT", "production")
 
+    SSO_BASE_URL: str = os.getenv("SSO_SERVER_URL", "")
+    SSO_REALM: str = os.getenv("SSO_REALM", "")
+    JWT_SSO_BASE_URL: str = f"{SSO_BASE_URL}/auth/realms/{SSO_REALM}"
+    JWT_EXPIRY: str = os.getenv("JWT_EXPIRY", "False")
+
 
 constants = Constants()

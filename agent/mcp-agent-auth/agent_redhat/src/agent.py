@@ -161,12 +161,12 @@ async def get_agent_redhat():
     mcp_bmi_host = os.getenv("MCP_BMI_HOST", "0.0.0.0")
     mcp_email_host = os.getenv("MCP_EMAIL_HOST", "0.0.0.0")
     mcp_websearch_host = os.getenv("MCP_WEBSEARCH_HOST", "0.0.0.0")
-    mcp_dataverse_host = os.getenv("MCP_SNOWFLAKE_HOST", "0.0.0.0")
+    mcp_snowflake_host = os.getenv("MCP_SNOWFLAKE_HOST", "0.0.0.0")
 
     mcp_bmi_port = os.getenv("MCP_BMI_PORT", "1002")
     mcp_email_port = os.getenv("MCP_EMAIL_PORT", "2002")
     mcp_websearch_port = os.getenv("MCP_WEBSEARCH_PORT", "3002")
-    mcp_dataverse_port = os.getenv("MCP_SNOWFLAKE_PORT", "4002")
+    mcp_snowflake_port = os.getenv("MCP_SNOWFLAKE_PORT", "4002")
 
     # Initialize MCP client and get tools
     client = MultiServerMCPClient(
@@ -184,7 +184,7 @@ async def get_agent_redhat():
                 "transport": "streamable_http"
             },
             "dataverse_agent_tool": {
-                "url": f"http://{mcp_dataverse_host}:{mcp_dataverse_port}/mcp",
+                "url": f"http://{mcp_snowflake_host}:{mcp_snowflake_port}/mcp",
                 "transport": "streamable_http"
             }
         }

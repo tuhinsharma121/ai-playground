@@ -123,8 +123,8 @@ services:
       - MCP_EMAIL_PORT=2002
       - MCP_BMI_HOST=mcp_bmi
       - MCP_BMI_PORT=1002
-      - MCP_DATAVERSE_HOST=mcp_snowflake
-      - MCP_DATAVERSE_PORT=4002
+      - MCP_SNOWFLAKE_HOST=mcp_snowflake
+      - MCP_SNOWFLAKE_PORT=4002
       - PORT=8000
     env_file:
       - .env
