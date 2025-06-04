@@ -23,7 +23,11 @@ dependencies = [
     "langchain-mcp-adapters==0.1.1",
     "psycopg2-binary==2.9.10",
     "langfuse==2.60.5",
-    "mcp==1.9.1"
+    "mcp==1.9.1",
+    "requests-oauthlib==2.0.0",
+    "starlette==0.46.2",
+    "itsdangerous==2.2.0",
+    "PyJWT==2.10.1"
 ]
 
 [project.optional-dependencies]

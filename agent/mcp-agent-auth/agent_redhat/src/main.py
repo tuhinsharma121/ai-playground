@@ -1,21 +1,29 @@
 import inspect
 import json
+import os
+import secrets
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Annotated, Any
+from typing import Any
 from uuid import UUID, uuid4
 
 import psycopg2
 import uvicorn
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
+from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import OAuth2AuthorizationCodeBearer
+from jwt import PyJWKClient
 from langchain_core.messages import AIMessage, AIMessageChunk, AnyMessage, HumanMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
 from langfuse.callback import CallbackHandler
 from langgraph.pregel import Pregel
 from langgraph.types import Command, Interrupt
+from requests_oauthlib import OAuth2Session
+from starlette.middleware.sessions import SessionMiddleware
 
 from agent_redhat.src.agent import get_agent_redhat
 from utils.agent_utils import (
@@ -35,18 +43,48 @@ from utils.schema import (
     StreamInput,
     UserInput, )
 
+# OAuth2 scheme for authorization
+oauth_2_scheme = OAuth2AuthorizationCodeBearer(
+    authorizationUrl=f"{constants.JWT_SSO_BASE_URL}/protocol/openid-connect/auth",
+    tokenUrl=f"{constants.JWT_SSO_BASE_URL}/protocol/openid-connect/token",
+)
 
-def verify_bearer(
-        http_auth: Annotated[
-            HTTPAuthorizationCredentials | None,
-            Depends(HTTPBearer(description="Please provide AUTH_SECRET api key.", auto_error=False)),
-        ],
-) -> None:
-    if not constants.AUTH_SECRET:
-        return
-    auth_secret = constants.AUTH_SECRET.get_secret_value()
-    if not http_auth or http_auth.credentials != auth_secret:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+# Initialize the JWK client
+url = f"{constants.JWT_SSO_BASE_URL}/protocol/openid-connect/certs"
+optional_custom_headers = {"User-agent": "custom-user-agent"}
+jwks_client = PyJWKClient(url, headers=optional_custom_headers)
+
+SSO_CALLBACK_URL="http://0.0.0.0:8000/callback"
+SCOPE = ['session:role:HELLO_REDHAT_GROUP', 'refresh_token']
+
+class OAuth2Handler:
+    """OAuth2 handler class - equivalent to fastify.customOAuth2"""
+
+    @staticmethod
+    def create_oauth_session(state=None):
+        return OAuth2Session(
+            constants.SSO_CLIENT_ID,
+            scope=SCOPE,
+            redirect_uri=SSO_CALLBACK_URL,
+            state=state
+        )
+
+    @staticmethod
+    def get_authorization_url():
+        oauth = OAuth2Handler.create_oauth_session()
+        authorization_url, state = oauth.authorization_url(constants.AUTHORIZATION_BASE_URL)
+        return authorization_url, state
+
+    @staticmethod
+    def get_access_token_from_authorization_code_flow(code: str, state: str):
+        oauth = OAuth2Handler.create_oauth_session(state=state)
+        token = oauth.fetch_token(
+            constants.TOKEN_URL,
+            code=code,
+            client_secret=constants.SSO_CLIENT_SECRET,
+            include_client_id=True
+        )
+        return token
 
 
 @asynccontextmanager
@@ -65,13 +103,173 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Add session middleware (equivalent to Fastify session)
+app.add_middleware(SessionMiddleware, secret_key=os.getenv('SESSION_SECRET', secrets.token_hex(32)))
+
 app.logger = get_python_logger(constants.LOG_LEVEL)
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
 app.langfuse_handler = CallbackHandler(trace_name="agent-redhat", environment=constants.LANGFUSE_TRACING_ENVIRONMENT)
 
 app.client = Langfuse(environment=constants.LANGFUSE_TRACING_ENVIRONMENT)
-router = APIRouter(dependencies=[Depends(verify_bearer)])
+
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+
+def add_user_id_to_callback(auth_url, user_id):
+    # Parse the authorization URL
+    parsed_url = urlparse(auth_url)
+
+    # Parse query parameters
+    query_params = parse_qs(parsed_url.query)
+
+    # Get the redirect_uri and decode it
+    redirect_uri = query_params['redirect_uri'][0]
+
+    # Parse the redirect URI
+    parsed_redirect = urlparse(redirect_uri)
+    redirect_query_params = parse_qs(parsed_redirect.query)
+
+    # Add user_id to the callback URL parameters
+    redirect_query_params['user_id'] = [user_id]
+
+    # Reconstruct the redirect URI
+    new_redirect_query = urlencode(redirect_query_params, doseq=True)
+    new_redirect_uri = urlunparse((
+        parsed_redirect.scheme,
+        parsed_redirect.netloc,
+        parsed_redirect.path,
+        parsed_redirect.params,
+        new_redirect_query,
+        parsed_redirect.fragment
+    ))
+
+    # Update the original URL with the new redirect_uri
+    query_params['redirect_uri'] = [new_redirect_uri]
+    new_query = urlencode(query_params, doseq=True)
+
+    # Reconstruct the full authorization URL
+    new_auth_url = urlunparse((
+        parsed_url.scheme,
+        parsed_url.netloc,
+        parsed_url.path,
+        parsed_url.params,
+        new_query,
+        parsed_url.fragment
+    ))
+
+    return new_auth_url
+
+
+
+# Routes - equivalent to your fastify routes
+@app.get("/login")
+async def login(request: Request, user_id: str):
+    """Start redirect path - equivalent to startRedirectPath in Node.js"""
+    authorization_url, state = OAuth2Handler.get_authorization_url()
+    updated_url = add_user_id_to_callback(authorization_url, user_id)
+    app.logger.info(updated_url)
+    app.logger.info(authorization_url)
+    app.logger.info(state)
+    # autorization_url  = authorization_url + "?username=tuhin"
+    # Store state in session for security
+    request.session['oauth_state'] = state
+
+    return RedirectResponse(url=updated_url)
+
+
+app.fake_db = dict()
+
+
+@app.get("/callback")
+async def callback(request: Request, user_id: str, code: str = None):
+    """OAuth callback - equivalent to your fastify.get('/callback')"""
+
+    app.logger.info(f"Code from auth: {code}")
+    app.logger.info(user_id)
+    app.logger.info(request.session)
+
+
+
+    if not code:
+        raise HTTPException(status_code=400, detail="Authorization code not provided")
+
+    try:
+        # Get state from session
+        state = request.session.get('oauth_state')
+
+        # Get access token - equivalent to getAccessTokenFromAuthorizationCodeFlow
+        token_set = OAuth2Handler.get_access_token_from_authorization_code_flow(code, state)
+
+        print(f"Token Set: {token_set}")
+        app.fake_db[user_id] = token_set
+
+        # Store user in session - equivalent to request.session.user = tokenSet
+        request.session['user'] = token_set
+
+        # Redirect to home - equivalent to reply.redirect("/")
+        return RedirectResponse(url="/")
+
+    except Exception as error:
+        print(f"Error: {error}")
+        # Still send the code as in original - equivalent to reply.send({ access_token: code })
+        return JSONResponse(content={"access_token": code})
+
+
+# This route serves as the heartbeat or health check endpoint for the application.
+@app.get("/")
+async def home(request: Request):
+    """Home route to check authentication status"""
+    user = request.session.get('user')
+    if user:
+        return JSONResponse(content={
+            "message": "Authenticated successfully",
+            "user": user
+        })
+    else:
+        return JSONResponse(content={
+            "message": "Not authenticated",
+            "login_url": "/login"
+        })
+
+
+@app.get("/logout")
+async def logout(request: Request):
+    """Logout route"""
+    request.session.pop('user', None)
+    request.session.pop('oauth_state', None)
+    return RedirectResponse(url="/")
+
+
+# Helper function to get authenticated user
+def get_current_user(request: Request):
+    """Dependency to get current authenticated user"""
+    user = request.session.get('user')
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user
+
+
+router = APIRouter()
+
+
+# Example of using the authenticated user in other routes
+@router.get("/protected")
+async def protected_route(current_user=Depends(get_current_user)):
+    """Example protected route that requires authentication"""
+    return JSONResponse(content={
+        "message": "This is a protected route",
+        "user": current_user
+    })
 
 
 async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str, Any], UUID]:
@@ -135,10 +333,10 @@ async def message_generator(
 
     This is the workhorse method for the /stream endpoint.
     """
-    async with get_agent_redhat() as agent:
-        # agent: Pregel = get_research_assistant()
+    sf_access_token = app.fake_db.get(user_input.user_id)
+    app.logger.info(sf_access_token)
+    async with get_agent_redhat(sf_access_token) as agent:
         kwargs, run_id = await _handle_input(user_input, agent)
-
         try:
             app.logger.info(f"Running agent with kwargs: {kwargs}")
             # Process streamed events from the graph and yield messages over the SSE stream.
@@ -273,6 +471,7 @@ async def stream(user_input: StreamInput) -> StreamingResponse:
 
     Set `stream_tokens=false` to return intermediate messages but not token-by-token.
     """
+
     return StreamingResponse(
         message_generator(user_input),
         media_type="text/event-stream",

@@ -189,3 +189,13 @@ class AgentClient:
         # logger.info(f"Thread IDs: {response.json()}")
 
         return response.json()
+
+    def connect_snowflake(self):
+        try:
+            response = httpx.get(
+                f"{self.base_url}/login",
+                headers=self._headers,
+                timeout=self.timeout,
+            )
+        except httpx.HTTPError as e:
+            raise AgentClientError(f"Error: {e}")

@@ -1,13 +1,12 @@
 import os
 
+from dotenv import load_dotenv
 from pydantic import (
     SecretStr,
 )
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
 
 load_dotenv()
-
 
 
 class Constants(BaseSettings):
@@ -32,6 +31,17 @@ class Constants(BaseSettings):
     SSO_REALM: str = os.getenv("SSO_REALM", "")
     JWT_SSO_BASE_URL: str = f"{SSO_BASE_URL}/auth/realms/{SSO_REALM}"
     JWT_EXPIRY: str = os.getenv("JWT_EXPIRY", "False")
+
+    # SnowflakeConfiguration/Snowflake配置
+    SNOWFLAKE_ACCOUNT: str = os.getenv("SNOWFLAKE_ACCOUNT", None)
+
+    # Configuration - equivalent to your Node.js constants
+    SSO_CLIENT_ID: str = os.getenv("SSO_CLIENT_ID", None)
+    SSO_CLIENT_SECRET: str = os.getenv("SSO_CLIENT_SECRET", None)
+
+    # OAuth2 Configuration - equivalent to your credentials config
+    AUTHORIZATION_BASE_URL: str = f'https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/oauth/authorize'
+    TOKEN_URL: str = f'https://{SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/oauth/token-request'
 
 
 constants = Constants()

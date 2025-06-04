@@ -10,8 +10,6 @@ from utils.pylogger import get_python_logger
 from utils.schema import ChatHistory, ChatMessage
 
 
-
-
 # Add these new functions after your existing utility functions
 
 def show_login_screen():
@@ -59,14 +57,14 @@ def show_login_screen():
 
         # Login form
         with st.form("login_form"):
-            username = st.text_input("Username", placeholder="Enter your username")
+            user_id = st.text_input("Username", placeholder="Enter your username")
             password = st.text_input("Password", type="password", placeholder="Enter your password")
             login_button = st.form_submit_button("Login", use_container_width=True)
 
             if login_button:
-                if authenticate_user(username, password):
+                if authenticate_user(user_id, password):
                     st.session_state["authenticated"] = True
-                    st.session_state["username"] = username
+                    st.session_state["user_id"] = user_id
                     st.success("Login successful!")
                     st.rerun()
                 else:
@@ -75,15 +73,15 @@ def show_login_screen():
         st.markdown('</div>', unsafe_allow_html=True)
 
 
-def authenticate_user(username: str, password: str) -> bool:
+def authenticate_user(user_id: str, password: str) -> bool:
     """Authenticate user credentials"""
-    return username
+    return user_id
 
 
 def logout():
     """Clear authentication and session data"""
     keys_to_clear = [
-        "authenticated", "username", "session_id", "user_id",
+        "authenticated", "session_id", "user_id",
         "agent_client", "thread_id", "messages", "chat_history",
         "last_message", "last_feedback", "first_load"
     ]
@@ -98,14 +96,14 @@ def logout():
 def get_or_create_user_id() -> str:
     """Get the user ID from session state - now based on authenticated user"""
     # Use the authenticated username as user_id
-    if "username" in st.session_state:
-        user_id = st.session_state["username"]
+    if "user_id" in st.session_state:
+        user_id = st.session_state["user_id"]
         st.session_state["user_id"] = user_id
         # st.query_params["user_id"] = user_id
         return user_id
-
     # Fallback
     return "anonymous"
+
 
 logger = get_python_logger()
 
@@ -279,6 +277,12 @@ async def main() -> None:
         # Add this in your sidebar, after the "New Chat" button
         if st.button("🚪 Logout", use_container_width=True):
             logout()
+
+        st.link_button(
+                "Connect SF",
+                f"http://0.0.0.0:8000/login?user_id={st.session_state["user_id"]}",
+                use_container_width=True
+        )
 
         # Display chat history in sidebar
         st.subheader("Chat History")
@@ -547,7 +551,6 @@ async def draw_messages(
 
 async def handle_feedback() -> None:
     """Draws a feedback widget and records feedback from the user."""
-
 
     # Keep track of last feedback sent to avoid sending duplicates
     if "last_feedback" not in st.session_state:

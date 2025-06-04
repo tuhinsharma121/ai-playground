@@ -43,7 +43,6 @@ unsafe_content_categories = {
 
 unsafe_content_categories = {
     "S1": "Violent Crimes.",
-    "S2": "Non-Violent Crimes.",
     "S3": "Sex Crimes."
 }
 

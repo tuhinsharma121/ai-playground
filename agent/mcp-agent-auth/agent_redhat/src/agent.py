@@ -37,32 +37,35 @@ class AgentState(MessagesState, total=False):
     remaining_steps: RemainingSteps
 
 
-current_date = datetime.now().strftime("%B %d, %Y")
 
-instructions = f"""
-    You are a helpful assistant with the ability to use other tools after taking permission from the user. 
-    Your name is Hello Red Hat.
-
-    Today's date is {current_date}.
-
-    A few things to remember:
-    - Always use the same language as the user. 
-    - Please include markdown-formatted links to any citations used in your response. Only include one
-    or two citations per response unless more are needed. ONLY USE LINKS RETURNED BY THE TOOLS.
-    - Only use the tools you are given to answer the users question. Do not answer directly from internal knowledge.
-    - You must always reason before acting.
-    - Every Final Answer must be grounded in tool observations.
-    - ALWAYS TAKE PERMISSION FROM THE USER AND PROVIDE REASONING BEHIND IT BEFORE USING EVERY TOOL 
-    AND ONLY AFTER THE USER AGREES USE THE SPECIFIC TOOL.
-    - always make sure your answer is *FORMATTED WELL*
-    """
 
 
 # =====================================================================
 # RED HAT AGENT
 # =====================================================================
 
-def create_agent(tools):
+def create_agent(tools,sf_access_token):
+    current_date = datetime.now().strftime("%B %d, %Y")
+
+    instructions = f"""
+        You are a helpful assistant with the ability to use other tools after taking permission from the user. 
+        Your name is Hello Red Hat. You are also an expert in writing Snowflake queries.
+
+        Today's date is {current_date}. 
+        Snowflake access token is {sf_access_token}
+
+        A few things to remember:
+        - Always use the same language as the user. 
+        - Please include markdown-formatted links to any citations used in your response. Only include one
+        or two citations per response unless more are needed. ONLY USE LINKS RETURNED BY THE TOOLS.
+        - Only use the tools you are given to answer the users question. Do not answer directly from internal knowledge.
+        - You must always reason before acting.
+        - Every Final Answer must be grounded in tool observations.
+        - ALWAYS TAKE PERMISSION FROM THE USER AND PROVIDE REASONING BEHIND IT BEFORE USING EVERY TOOL 
+        AND ONLY AFTER THE USER AGREES USE THE SPECIFIC TOOL.
+        - always make sure your answer is *FORMATTED WELL*
+        """
+
     def wrap_model(model: BaseChatModel) -> RunnableSerializable[AgentState, AIMessage]:
         bound_model = model.bind_tools(tools)
         preprocessor = RunnableLambda(
@@ -155,7 +158,7 @@ def create_agent(tools):
 
 
 @asynccontextmanager
-async def get_agent_redhat():
+async def get_agent_redhat(sf_access_token=None):
     """Get a fully initialized research assistant."""
     # Environment configuration
     mcp_bmi_host = os.getenv("MCP_BMI_HOST", "0.0.0.0")
@@ -192,7 +195,7 @@ async def get_agent_redhat():
     tools = await client.get_tools()
 
     async with get_postgres_saver() as checkpointer, get_postgres_store() as store:
-        agent = create_agent(tools=tools)
+        agent = create_agent(tools=tools,sf_access_token=sf_access_token)
 
         # Compile the graph with checkpointer and store
         agent_redhat = agent.compile(checkpointer=checkpointer, store=store)
