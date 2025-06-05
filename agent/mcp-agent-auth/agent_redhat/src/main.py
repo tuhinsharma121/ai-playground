@@ -43,16 +43,6 @@ from utils.schema import (
     StreamInput,
     UserInput, )
 
-# OAuth2 scheme for authorization
-oauth_2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=f"{constants.JWT_SSO_BASE_URL}/protocol/openid-connect/auth",
-    tokenUrl=f"{constants.JWT_SSO_BASE_URL}/protocol/openid-connect/token",
-)
-
-# Initialize the JWK client
-url = f"{constants.JWT_SSO_BASE_URL}/protocol/openid-connect/certs"
-optional_custom_headers = {"User-agent": "custom-user-agent"}
-jwks_client = PyJWKClient(url, headers=optional_custom_headers)
 
 SSO_CALLBACK_URL="http://0.0.0.0:8000/callback"
 SCOPE = ['session:role:HELLO_REDHAT_GROUP', 'refresh_token']
