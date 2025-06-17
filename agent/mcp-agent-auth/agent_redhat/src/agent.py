@@ -5,19 +5,21 @@ from typing import Literal
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, SystemMessage
-from langchain_core.runnables import RunnableConfig, RunnableSerializable, RunnableLambda
+from langchain_core.runnables import (
+    RunnableConfig,
+    RunnableLambda,
+    RunnableSerializable,
+)
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.constants import END
-from langgraph.graph import MessagesState
-from langgraph.graph import StateGraph
+from langgraph.graph import MessagesState, StateGraph
 from langgraph.managed import RemainingSteps
 from langgraph.prebuilt import ToolNode
 
 from utils.constants import constants
-from utils.guardrail import (
-    LlamaGuardOutput, SafetyAssessment, LlamaGuard)
-from utils.memory import get_postgres_store, get_postgres_saver
+from utils.guardrail import LlamaGuard, LlamaGuardOutput, SafetyAssessment
+from utils.memory import get_postgres_saver, get_postgres_store
 from utils.pylogger import get_python_logger
 
 # =====================================================================
@@ -37,22 +39,19 @@ class AgentState(MessagesState, total=False):
     remaining_steps: RemainingSteps
 
 
-
-
-
 # =====================================================================
 # RED HAT AGENT
 # =====================================================================
 
-def create_agent(tools,sf_access_token):
+
+def create_agent(tools):
     current_date = datetime.now().strftime("%B %d, %Y")
 
     instructions = f"""
-        You are a helpful assistant with the ability to use other tools after taking permission from the user. 
+        You are a helpful assistant with the ability to use other tools. 
         Your name is Hello Red Hat. You are also an expert in writing Snowflake queries.
 
         Today's date is {current_date}. 
-        Snowflake access token is {sf_access_token}
 
         A few things to remember:
         - Always use the same language as the user. 
@@ -61,8 +60,6 @@ def create_agent(tools,sf_access_token):
         - Only use the tools you are given to answer the users question. Do not answer directly from internal knowledge.
         - You must always reason before acting.
         - Every Final Answer must be grounded in tool observations.
-        - ALWAYS TAKE PERMISSION FROM THE USER AND PROVIDE REASONING BEHIND IT BEFORE USING EVERY TOOL 
-        AND ONLY AFTER THE USER AGREES USE THE SPECIFIC TOOL.
         - always make sure your answer is *FORMATTED WELL*
         """
 
@@ -75,9 +72,7 @@ def create_agent(tools,sf_access_token):
         return preprocessor | bound_model  # type: ignore[return-value]
 
     def format_safety_message(safety: LlamaGuardOutput) -> AIMessage:
-        content = (
-            f"This conversation was flagged for unsafe content: {', '.join(safety.unsafe_categories)}"
-        )
+        content = f"This conversation was flagged for unsafe content: {', '.join(safety.unsafe_categories)}"
         return AIMessage(content=content)
 
     async def acall_model(state: AgentState, config: RunnableConfig) -> AgentState:
@@ -90,9 +85,14 @@ def create_agent(tools,sf_access_token):
 
         # Run llama guard check here to avoid returning the message if it's unsafe
         llama_guard = LlamaGuard()
-        safety_output = await llama_guard.ainvoke("Agent", state["messages"] + [response])
+        safety_output = await llama_guard.ainvoke(
+            "Agent", state["messages"] + [response]
+        )
         if safety_output.safety_assessment == SafetyAssessment.UNSAFE:
-            return {"messages": [format_safety_message(safety_output)], "safety": safety_output}
+            return {
+                "messages": [format_safety_message(safety_output)],
+                "safety": safety_output,
+            }
 
         if state["remaining_steps"] < 2 and response.tool_calls:
             return {
@@ -106,12 +106,16 @@ def create_agent(tools,sf_access_token):
         # We return a list, because this will get added to the existing list
         return {"messages": [response]}
 
-    async def llama_guard_input(state: AgentState, config: RunnableConfig) -> AgentState:
+    async def llama_guard_input(
+        state: AgentState, config: RunnableConfig
+    ) -> AgentState:
         llama_guard = LlamaGuard()
         safety_output = await llama_guard.ainvoke("User", state["messages"])
         return {"safety": safety_output, "messages": []}
 
-    async def block_unsafe_content(state: AgentState, config: RunnableConfig) -> AgentState:
+    async def block_unsafe_content(
+        state: AgentState, config: RunnableConfig
+    ) -> AgentState:
         safety: LlamaGuardOutput = state["safety"]
         return {"messages": [format_safety_message(safety)]}
 
@@ -152,13 +156,15 @@ def create_agent(tools,sf_access_token):
 
     # After "model", if there are tool calls, run "tools". Otherwise END.
 
-    agent.add_conditional_edges("model", pending_tool_calls, {"tools": "tools", "done": END})
+    agent.add_conditional_edges(
+        "model", pending_tool_calls, {"tools": "tools", "done": END}
+    )
 
     return agent
 
 
 @asynccontextmanager
-async def get_agent_redhat(sf_access_token=None):
+async def get_agent_redhat(dataverse_access_token=None):
     """Get a fully initialized research assistant."""
     # Environment configuration
     mcp_bmi_host = os.getenv("MCP_BMI_HOST", "0.0.0.0")
@@ -176,31 +182,34 @@ async def get_agent_redhat(sf_access_token=None):
         {
             "bmi_agent_tool": {
                 "url": f"http://{mcp_bmi_host}:{mcp_bmi_port}/mcp",
-                "transport": "streamable_http"
+                "transport": "streamable_http",
             },
             "websearch_agent_tool": {
                 "url": f"http://{mcp_websearch_host}:{mcp_websearch_port}/mcp",
-                "transport": "streamable_http"
+                "transport": "streamable_http",
             },
             "email_agent_tool": {
                 "url": f"http://{mcp_email_host}:{mcp_email_port}/mcp",
-                "transport": "streamable_http"
+                "transport": "streamable_http",
             },
             "dataverse_agent_tool": {
                 "url": f"http://{mcp_snowflake_host}:{mcp_snowflake_port}/mcp",
-                "transport": "streamable_http"
-            }
+                "transport": "streamable_http",
+                "headers": {"Authorization": f"Bearer {dataverse_access_token}"},
+            },
         }
     )
+
     tools = await client.get_tools()
 
     async with get_postgres_saver() as checkpointer, get_postgres_store() as store:
-        agent = create_agent(tools=tools,sf_access_token=sf_access_token)
+        agent = create_agent(tools=tools)
 
         # Compile the graph with checkpointer and store
         agent_redhat = agent.compile(checkpointer=checkpointer, store=store)
 
         yield agent_redhat
+
 
 # async def main():
 #     """Main function to test the research assistant."""

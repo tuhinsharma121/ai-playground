@@ -1,0 +1,84 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "mcp_email",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/mcp_email/src/main.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "mcp_websearch",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/mcp_websearch/src/main.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "mcp_bmi",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/mcp_bmi/src/main.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+
+        {
+            "name": "mcp_snowflake",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/mcp_snowflake/src/main.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "agent_redhat",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/agent_redhat/src/main.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "hello_redhat",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/streamlit",
+            "console": "integratedTerminal",
+            "args": ["run","${workspaceFolder}/hello_redhat/src/main.py"],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ]
+} 

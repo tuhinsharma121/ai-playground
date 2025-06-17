@@ -24,7 +24,7 @@ dependencies = [
     "streamlit ~=1.45.1",
     "scikit-learn ~=1.6.1",
     "snowflake-connector-python==3.15.0",
-    "fastmcp==2.4.0"
+    "fastmcp==2.8.1"
 ]
 
 [project.optional-dependencies]

@@ -5,18 +5,21 @@ import secrets
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from uuid import UUID, uuid4
 
 import psycopg2
 import uvicorn
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
-from fastapi import Request
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, JSONResponse
-from fastapi.responses import StreamingResponse
-from fastapi.security import OAuth2AuthorizationCodeBearer
-from jwt import PyJWKClient
-from langchain_core.messages import AIMessage, AIMessageChunk, AnyMessage, HumanMessage, ToolMessage
+from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
+from langchain_core.messages import (
+    AIMessage,
+    AIMessageChunk,
+    AnyMessage,
+    HumanMessage,
+    ToolMessage,
+)
 from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
 from langfuse.callback import CallbackHandler
@@ -41,11 +44,12 @@ from utils.schema import (
     Feedback,
     FeedbackResponse,
     StreamInput,
-    UserInput, )
+    UserInput,
+)
 
+SSO_CALLBACK_URL = "http://0.0.0.0:8000/callback"
+SCOPE = ["session:role:HELLO_REDHAT_GROUP", "refresh_token"]
 
-SSO_CALLBACK_URL="http://0.0.0.0:8000/callback"
-SCOPE = ['session:role:HELLO_REDHAT_GROUP', 'refresh_token']
 
 class OAuth2Handler:
     """OAuth2 handler class - equivalent to fastify.customOAuth2"""
@@ -56,13 +60,15 @@ class OAuth2Handler:
             constants.SSO_CLIENT_ID,
             scope=SCOPE,
             redirect_uri=SSO_CALLBACK_URL,
-            state=state
+            state=state,
         )
 
     @staticmethod
     def get_authorization_url():
         oauth = OAuth2Handler.create_oauth_session()
-        authorization_url, state = oauth.authorization_url(constants.AUTHORIZATION_BASE_URL)
+        authorization_url, state = oauth.authorization_url(
+            constants.AUTHORIZATION_BASE_URL
+        )
         return authorization_url, state
 
     @staticmethod
@@ -72,7 +78,7 @@ class OAuth2Handler:
             constants.TOKEN_URL,
             code=code,
             client_secret=constants.SSO_CLIENT_SECRET,
-            include_client_id=True
+            include_client_id=True,
         )
         return token
 
@@ -84,7 +90,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     based on settings.
     """
     try:
-
         async with get_agent_redhat() as agent:
             yield
     except Exception as e:
@@ -103,16 +108,18 @@ app.add_middleware(
 )
 
 # Add session middleware (equivalent to Fastify session)
-app.add_middleware(SessionMiddleware, secret_key=os.getenv('SESSION_SECRET', secrets.token_hex(32)))
+app.add_middleware(
+    SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", secrets.token_hex(32))
+)
 
 app.logger = get_python_logger(constants.LOG_LEVEL)
 
 # Initialize Langfuse CallbackHandler for Langchain (tracing)
-app.langfuse_handler = CallbackHandler(trace_name="agent-redhat", environment=constants.LANGFUSE_TRACING_ENVIRONMENT)
+app.langfuse_handler = CallbackHandler(
+    trace_name="agent-redhat", environment=constants.LANGFUSE_TRACING_ENVIRONMENT
+)
 
 app.client = Langfuse(environment=constants.LANGFUSE_TRACING_ENVIRONMENT)
-
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 
 def add_user_id_to_callback(auth_url, user_id):
@@ -123,42 +130,45 @@ def add_user_id_to_callback(auth_url, user_id):
     query_params = parse_qs(parsed_url.query)
 
     # Get the redirect_uri and decode it
-    redirect_uri = query_params['redirect_uri'][0]
+    redirect_uri = query_params["redirect_uri"][0]
 
     # Parse the redirect URI
     parsed_redirect = urlparse(redirect_uri)
     redirect_query_params = parse_qs(parsed_redirect.query)
 
     # Add user_id to the callback URL parameters
-    redirect_query_params['user_id'] = [user_id]
+    redirect_query_params["user_id"] = [user_id]
 
     # Reconstruct the redirect URI
     new_redirect_query = urlencode(redirect_query_params, doseq=True)
-    new_redirect_uri = urlunparse((
-        parsed_redirect.scheme,
-        parsed_redirect.netloc,
-        parsed_redirect.path,
-        parsed_redirect.params,
-        new_redirect_query,
-        parsed_redirect.fragment
-    ))
+    new_redirect_uri = urlunparse(
+        (
+            parsed_redirect.scheme,
+            parsed_redirect.netloc,
+            parsed_redirect.path,
+            parsed_redirect.params,
+            new_redirect_query,
+            parsed_redirect.fragment,
+        )
+    )
 
     # Update the original URL with the new redirect_uri
-    query_params['redirect_uri'] = [new_redirect_uri]
+    query_params["redirect_uri"] = [new_redirect_uri]
     new_query = urlencode(query_params, doseq=True)
 
     # Reconstruct the full authorization URL
-    new_auth_url = urlunparse((
-        parsed_url.scheme,
-        parsed_url.netloc,
-        parsed_url.path,
-        parsed_url.params,
-        new_query,
-        parsed_url.fragment
-    ))
+    new_auth_url = urlunparse(
+        (
+            parsed_url.scheme,
+            parsed_url.netloc,
+            parsed_url.path,
+            parsed_url.params,
+            new_query,
+            parsed_url.fragment,
+        )
+    )
 
     return new_auth_url
-
 
 
 # Routes - equivalent to your fastify routes
@@ -172,7 +182,7 @@ async def login(request: Request, user_id: str):
     app.logger.info(state)
     # autorization_url  = authorization_url + "?username=tuhin"
     # Store state in session for security
-    request.session['oauth_state'] = state
+    request.session["oauth_state"] = state
 
     return RedirectResponse(url=updated_url)
 
@@ -188,23 +198,23 @@ async def callback(request: Request, user_id: str, code: str = None):
     app.logger.info(user_id)
     app.logger.info(request.session)
 
-
-
     if not code:
         raise HTTPException(status_code=400, detail="Authorization code not provided")
 
     try:
         # Get state from session
-        state = request.session.get('oauth_state')
+        state = request.session.get("oauth_state")
 
         # Get access token - equivalent to getAccessTokenFromAuthorizationCodeFlow
-        token_set = OAuth2Handler.get_access_token_from_authorization_code_flow(code, state)
+        token_set = OAuth2Handler.get_access_token_from_authorization_code_flow(
+            code, state
+        )
 
         print(f"Token Set: {token_set}")
         app.fake_db[user_id] = token_set
 
         # Store user in session - equivalent to request.session.user = tokenSet
-        request.session['user'] = token_set
+        request.session["user"] = token_set
 
         # Redirect to home - equivalent to reply.redirect("/")
         return RedirectResponse(url="/")
@@ -219,31 +229,29 @@ async def callback(request: Request, user_id: str, code: str = None):
 @app.get("/")
 async def home(request: Request):
     """Home route to check authentication status"""
-    user = request.session.get('user')
+    user = request.session.get("user")
     if user:
-        return JSONResponse(content={
-            "message": "Authenticated successfully",
-            "user": user
-        })
+        return JSONResponse(
+            content={"message": "Authenticated successfully", "user": user}
+        )
     else:
-        return JSONResponse(content={
-            "message": "Not authenticated",
-            "login_url": "/login"
-        })
+        return JSONResponse(
+            content={"message": "Not authenticated", "login_url": "/login"}
+        )
 
 
 @app.get("/logout")
 async def logout(request: Request):
     """Logout route"""
-    request.session.pop('user', None)
-    request.session.pop('oauth_state', None)
+    request.session.pop("user", None)
+    request.session.pop("oauth_state", None)
     return RedirectResponse(url="/")
 
 
 # Helper function to get authenticated user
 def get_current_user(request: Request):
     """Dependency to get current authenticated user"""
-    user = request.session.get('user')
+    user = request.session.get("user")
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return user
@@ -256,13 +264,14 @@ router = APIRouter()
 @router.get("/protected")
 async def protected_route(current_user=Depends(get_current_user)):
     """Example protected route that requires authentication"""
-    return JSONResponse(content={
-        "message": "This is a protected route",
-        "user": current_user
-    })
+    return JSONResponse(
+        content={"message": "This is a protected route", "user": current_user}
+    )
 
 
-async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str, Any], UUID]:
+async def _handle_input(
+    user_input: UserInput, agent: Pregel
+) -> tuple[dict[str, Any], UUID]:
     """
     Parse user input and handle any required interrupt resumption.
     Returns kwargs for agent invocation and the run_id.
@@ -272,13 +281,15 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     session_id = user_input.session_id or str(uuid4())
     user_id = user_input.user_id
 
-    configurable = {"thread_id": thread_id,
-                    "session_id": session_id,
-                    "message_id": run_id,
-                    "user_id": user_id,
-                    "langfuse_session_id": session_id,
-                    "langfuse_user_id": user_id,
-                    "langfuse_observation_id": thread_id}
+    configurable = {
+        "thread_id": thread_id,
+        "session_id": session_id,
+        "message_id": run_id,
+        "user_id": user_id,
+        "langfuse_session_id": session_id,
+        "langfuse_user_id": user_id,
+        "langfuse_observation_id": thread_id,
+    }
 
     if user_input.agent_config:
         if overlap := configurable.keys() & user_input.agent_config.keys():
@@ -315,23 +326,25 @@ async def _handle_input(user_input: UserInput, agent: Pregel) -> tuple[dict[str,
     return kwargs, run_id
 
 
-async def message_generator(
-        user_input: StreamInput
-) -> AsyncGenerator[str, None]:
+async def message_generator(user_input: StreamInput) -> AsyncGenerator[str, None]:
     """
     Generate a stream of messages from the agent.
 
     This is the workhorse method for the /stream endpoint.
     """
     sf_access_token = app.fake_db.get(user_input.user_id)
+    access_token = None
     app.logger.info(sf_access_token)
-    async with get_agent_redhat(sf_access_token) as agent:
+    if sf_access_token is not None and "access_token" in sf_access_token:
+        access_token = sf_access_token["access_token"]
+
+    async with get_agent_redhat(access_token) as agent:
         kwargs, run_id = await _handle_input(user_input, agent)
         try:
             app.logger.info(f"Running agent with kwargs: {kwargs}")
             # Process streamed events from the graph and yield messages over the SSE stream.
             async for stream_event in agent.astream(
-                    **kwargs, stream_mode=["updates", "messages", "custom"]
+                **kwargs, stream_mode=["updates", "messages", "custom"]
             ):
                 if not isinstance(stream_event, tuple):
                     continue
@@ -353,7 +366,11 @@ async def message_generator(
                         # special cases for using langgraph-supervisor library
                         if node == "supervisor":
                             # Get only the last AIMessage since supervisor includes all previous messages
-                            ai_messages = [msg for msg in update_messages if isinstance(msg, AIMessage)]
+                            ai_messages = [
+                                msg
+                                for msg in update_messages
+                                if isinstance(msg, AIMessage)
+                            ]
                             if ai_messages:
                                 update_messages = [ai_messages[-1]]
                         if node in ("research_expert", "math_expert"):
@@ -384,7 +401,9 @@ async def message_generator(
                     else:
                         # Add complete message if we have one in progress
                         if current_message:
-                            processed_messages.append(_create_ai_message(current_message))
+                            processed_messages.append(
+                                _create_ai_message(current_message)
+                            )
                             current_message = {}
                         processed_messages.append(message)
 
@@ -401,7 +420,10 @@ async def message_generator(
                         yield f"data: {json.dumps({'type': 'error', 'content': 'Unexpected error'})}\n\n"
                         continue
                     # LangGraph re-sends the input message, which feels weird, so drop it
-                    if chat_message.type == "human" and chat_message.content == user_input.message:
+                    if (
+                        chat_message.type == "human"
+                        and chat_message.content == user_input.message
+                    ):
                         continue
                     yield f"data: {json.dumps({'type': 'message', 'content': chat_message.model_dump()})}\n\n"
 
@@ -449,7 +471,9 @@ def _sse_response_example() -> dict[int | str, Any]:
     }
 
 
-@router.post("/stream", response_class=StreamingResponse, responses=_sse_response_example())
+@router.post(
+    "/stream", response_class=StreamingResponse, responses=_sse_response_example()
+)
 async def stream(user_input: StreamInput) -> StreamingResponse:
     """
     Stream an agent's response to a user input, including intermediate messages and tokens.
@@ -502,7 +526,9 @@ async def history(input: ChatHistoryInput) -> ChatHistory:
                 config=RunnableConfig(configurable={"thread_id": input.thread_id})
             )
             messages: list[AnyMessage] = state_snapshot.values["messages"]
-            chat_messages: list[ChatMessage] = [langchain_to_chat_message(m) for m in messages]
+            chat_messages: list[ChatMessage] = [
+                langchain_to_chat_message(m) for m in messages
+            ]
             return ChatHistory(messages=chat_messages)
         except Exception as e:
             app.logger.error(f"An exception occurred: {e}")
@@ -518,7 +544,9 @@ async def list_threads(user_id: str) -> list[str]:
         # Connect to the SQLite database
         with psycopg2.connect(get_postgres_connection_string()) as conn:
             cur = conn.cursor()
-            cur.execute(f"SELECT distinct thread_id FROM checkpoints where metadata->>'user_id'='{user_id}'")
+            cur.execute(
+                f"SELECT distinct thread_id FROM checkpoints where metadata->>'user_id'='{user_id}'"
+            )
             rows = cur.fetchall()
             thread_ids = [row[0] for row in rows]
             return thread_ids

@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "set-terminal-title",
+            "type": "shell",
+            "command": "echo '${PYTHON_LOG_LEVEL}'",
+            "presentation": {
+                "reveal": "never",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+} 
