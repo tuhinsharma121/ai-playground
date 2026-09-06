@@ -1,0 +1,15 @@
+[project]
+name = "deepeval-series"
+version = "0.1.0"
+description = "Companion notebook for: Your Evals Are Only As Honest As The Data Behind Them"
+requires-python = ">=3.11"
+dependencies = [
+    "deepeval==4.2.1",
+    "langgraph==1.2.11",
+    "langchain-core==1.6.2",
+    "langchain-google-genai==4.4.0",
+    "google-genai==2.22.0",
+]
+ 
+[dependency-groups]
+dev = ["jupyter==1.1.1"]
