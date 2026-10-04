@@ -1,0 +1,26 @@
+[project]
+name = "laya-multilingual-triage"
+version = "0.1.0"
+description = "Companion notebook for: Multilingual Issue Triage on a CPU, Without Generating a Token"
+requires-python = ">=3.11"
+dependencies = [
+    "laya==0.3.26",
+    "torch==2.14.1",
+    "pandas==3.0.6",
+    "huggingface-hub==1.33.0",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter==1.1.1",
+    "ipykernel==7.4.0",
+]
+
+# CPU-only torch wheels on Linux and Windows; macOS wheels are CPU builds already
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]
