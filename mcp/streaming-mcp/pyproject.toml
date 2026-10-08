@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[project]
+name = "streaming-mcp"
+version = "0.1.0"
+description = "Real-time streaming FastMCP tool consumed by a LangGraph agent and rendered in Streamlit"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # Standalone FastMCP server framework.
+    "deepagents==0.7.19",
+    "fastmcp==3.4.8",
+    "langgraph==1.2.14",
+    "langchain==1.4.3",
+    "langchain-core==1.6.7",
+    "langchain-google-genai==4.4.0",
+    "langchain-mcp-adapters==0.3.2",
+    "python-dotenv==1.2.4",
+    "streamlit==1.65.0",
+]
+
+[project.scripts]
+streaming-mcp-parent-server = "parent_mcp_server:main"
+streaming-mcp-child-server = "child_mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+# Flat layout: ship the three top-level modules rather than a package directory.
+include = ["parent_mcp_server.py", "child_mcp_server.py", "parent_react_agent.py", "child_react_agent.py", "deep_agent_factory.py", "parent_streamlit_app.py", "child_streamlit_app.py", "streamlit_ui.py", "events.py", "demo_data.py"]
