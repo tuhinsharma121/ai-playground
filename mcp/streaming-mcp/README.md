@@ -43,3 +43,11 @@ Please validate tuhin@gmail.com and then show me the profile information for tha
 ```
 
 This displays the parent MCP tool's relayed progress: server-side child-agent lifecycle updates, both child tool streams, the child-agent summary, and then the parent-agent response.
+
+## Cursor behavior
+
+Cursor currently shows the completed result of an MCP tool call rather than its
+MCP progress notifications. Every MCP tool therefore returns JSON with a temporally
+ordered `execution_trace` array. The child tools include their structured account
+data in `result`; the parent orchestration tool includes the child agent's summary
+in `final_result`. Streamlit still renders the same events live as they arrive.
